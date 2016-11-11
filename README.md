@@ -1,6 +1,6 @@
 #BluetoothLE library
 
-[English](https://github.com/qindachang/QinBluetoothLe/blob/master/README-EN.md "English")
+[English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
 
 低功耗蓝牙框架。**优势**：
 
