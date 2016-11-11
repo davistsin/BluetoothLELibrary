@@ -29,12 +29,10 @@ dependencies {
 }
 //添加
 publish {
-    userOrg = 'qindachang'//bintray.com用户名
-    groupId = 'com.qindachang'//jcenter上的路径
-    artifactId = 'BluetoothLELibrary'//项目名称
-    publishVersion = '0.1.0'//版本号
-    desc = 'Android Bluetooth LE library'//描述，不重要
-    website = 'https://github.com/qindachang/BluetoothLELibrary'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
+    userOrg = 'qindachang'
+    groupId = 'com.qindachang'
+    artifactId = 'BluetoothLELibrary'
+    publishVersion = '0.1.1'
+    desc = 'Android Bluetooth LE library'
+    website = 'https://github.com/qindachang/BluetoothLELibrary'
 }
-
-//最终引入方式  compile 'com.qindachang:BluetoothLELibrary:0.1.0'

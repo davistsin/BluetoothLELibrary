@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.1.0'
+	compile 'com.qindachang:BluetoothLELibrary:0.1.1'
 
 
 **一、获取单例实例**
