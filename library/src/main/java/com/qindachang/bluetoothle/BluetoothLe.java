@@ -183,4 +183,8 @@ public class BluetoothLe {
     public void destroy() {
         mBleManager.destroy();
     }
+
+    public void clear() {
+        mBleManager.clearQueue();
+    }
 }

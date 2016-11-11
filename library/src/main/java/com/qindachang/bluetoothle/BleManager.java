@@ -467,10 +467,18 @@ class BleManager {
         }
     };
 
-    public void destroy() {
+    void destroy() {
         mActivity = null;
-        mOnLeConnectListener = null;
+        mRequestQueue.cancelAll();
         mOnLeScanListener = null;
+        mOnLeConnectListener = null;
+        mOnLeNotificationListener = null;
+        mOnLeWriteCharacteristicListener = null;
+        mOnLeReadCharacteristicListener = null;
+    }
+
+    void clearQueue() {
+        mRequestQueue.cancelAll();
     }
 
     private class RequestQueue {

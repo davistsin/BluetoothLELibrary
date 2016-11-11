@@ -10,14 +10,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.qindachang.bluetoothlelibrary.MainActivity">
-    <Button
-        android:text="扫描"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="16dp"
-        android:id="@+id/btn_scan"/>
 
     <ScrollView
         android:id="@+id/scrollView2"
@@ -49,15 +41,6 @@
         android:id="@+id/btn_stop_scan"/>
 
     <Button
-        android:text="连接"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_scan"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="19dp"
-        android:id="@+id/btn_connect"/>
-
-    <Button
         android:text="断开"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,21 +57,12 @@
         android:layout_alignParentEnd="true"/>
 
     <Button
-        android:text="开启全部通知"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_connect"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="13dp"
-        android:id="@+id/btn_open_notification"/>
-
-    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/btn_stop_scan"
         android:layout_alignParentEnd="true"
         android:id="@+id/btn_write_hr"
-        android:text="写10次01,01" />
+        android:text="写50次01,01" />
 
     <Button
         android:text="写0x06,0x01"
@@ -105,5 +79,45 @@
         android:layout_alignBottom="@+id/btn_open_notification"
         android:layout_toEndOf="@+id/btn_open_notification"
         android:id="@+id/btn_read"/>
+
+    <Button
+        android:text="连接"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_connect"
+        android:layout_below="@+id/btn_scan"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:text="扫描"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_scan"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:text="开启全部通知"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_open_notification"
+        android:layout_below="@+id/btn_disconnect"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:text="清除所有请求队列"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_clear_all"
+        android:layout_below="@+id/btn_write_step"
+        android:layout_alignParentEnd="true"/>
+
+    <Button
+        android:text="关闭全部通知"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_open_notification"
+        android:layout_alignParentStart="true"
+        android:id="@+id/btn_close_all_notify"/>
 
 </RelativeLayout>

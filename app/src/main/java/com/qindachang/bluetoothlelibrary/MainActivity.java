@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private static final byte[] OPEN_STEP_NOTIFY = {0x06, 0x01};
 
     private Button btn_scan, btn_stop_scan, btn_connect, btn_disconnect, btn_clear, btn_open_notification,
-            btn_write_hr, btn_write_step, btn_read;
+            btn_write_hr, btn_write_step, btn_read, btn_clear_all, btn_close_all_notify;
     private TextView tv_text;
 
     private BluetoothLe mBluetoothLe;
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         btn_write_hr = (Button) findViewById(R.id.btn_write_hr);
         btn_write_step = (Button) findViewById(R.id.btn_write_step);
         btn_read = (Button) findViewById(R.id.btn_read);
+        btn_clear_all = (Button) findViewById(R.id.btn_clear_all);
+        btn_close_all_notify = (Button) findViewById(R.id.btn_close_all_notify);
 
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
         mBluetoothLe.init(this);//必须调用init()初始化
@@ -109,7 +111,9 @@ public class MainActivity extends AppCompatActivity {
         btn_write_hr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMsg(OPEN_HEART_RATE_NOTIFY);
+                for (int i = 0; i < 50; i++) {
+                    sendMsg(OPEN_HEART_RATE_NOTIFY);
+                }
             }
         });
         btn_write_step.setOnClickListener(new View.OnClickListener() {
@@ -119,21 +123,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mBluetoothLe.setOnWriteCharacteristicListener(new OnLeWriteCharacteristicListener() {
 
-            @Override
-            public void onSuccess(BluetoothGattCharacteristic characteristic) {
-                Log.d("debug", "发送了数据:" + Arrays.toString(characteristic.getValue()));
-                mStringBuilder.append("发送了：").append(Arrays.toString(characteristic.getValue()));
-                mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-            @Override
-            public void onFailed(String msg, int status) {
-
-            }
-        });
 
         btn_read.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +131,19 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < 20; i++) {
                     read();
                 }
+            }
+        });
+        btn_clear_all.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBluetoothLe.clear();
+            }
+        });
+
+        btn_close_all_notify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBluetoothLe.enableBleNotification(false,SERVICE_UUID,new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
             }
         });
 
@@ -157,6 +160,21 @@ public class MainActivity extends AppCompatActivity {
                 mStringBuilder.append("读取失败：").append(info);
                 mStringBuilder.append("\n");
                 tv_text.setText(mStringBuilder.toString());
+            }
+        });
+        mBluetoothLe.setOnWriteCharacteristicListener(new OnLeWriteCharacteristicListener() {
+
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+                Log.d("debug", "发送了数据:" + Arrays.toString(characteristic.getValue()));
+                mStringBuilder.append("发送了：").append(Arrays.toString(characteristic.getValue()));
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
+            }
+
+            @Override
+            public void onFailed(String msg, int status) {
+
             }
         });
     }
@@ -272,6 +290,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
+                mStringBuilder.append("收到通知：" + Arrays.toString(characteristic.getValue()) + "\n");
+                tv_text.setText(mStringBuilder.toString());
             }
 
             @Override
