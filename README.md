@@ -204,7 +204,8 @@
     mBluetoothLe.clearQueue();
 
 **十二、关闭GATT**
-在你退出应用的使用
+
+在你退出应用的时候使用
 
     mBluetoothLe.close();
 
