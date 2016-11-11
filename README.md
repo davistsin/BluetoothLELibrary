@@ -29,6 +29,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+**引入方式**
+
+	compile 'com.qindachang:BluetoothLELibrary:0.1.0'
+
+
 **一、获取单例实例**
 
 	BluetoothLe mBluetoothLe = BluetoothLe.getDefault();
