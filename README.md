@@ -46,7 +46,7 @@
 
 **三、扫描**
 
-扫描过程携带6.0动态权限：地理位置权限申请
+扫描过程已携带6.0动态权限申请：地理位置权限
 
     private BluetoothDevice mBluetoothDevice;
 
