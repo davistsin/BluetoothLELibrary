@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.3"
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'no.nordicsemi.android.support.v18:scanner:0.2.0'
+    compile 'com.android.support:support-v4:24.2.1'
+}
+//添加
+publish {
+    userOrg = 'qindachang'//bintray.com用户名
+    groupId = 'com.qindachang'//jcenter上的路径
+    artifactId = 'BluetoothLELibrary'//项目名称
+    publishVersion = '0.1.0'//版本号
+    desc = 'Android Bluetooth LE library'//描述，不重要
+    website = 'https://github.com/qindachang/BluetoothLELibrary'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
+}
+
+//最终引入方式  compile 'com.qindachang:BluetoothLELibrary:0.1.0'
