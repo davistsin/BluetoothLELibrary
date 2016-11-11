@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         btn_clear_all.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBluetoothLe.clear();
+                mBluetoothLe.clearQueue();
             }
         });
 
