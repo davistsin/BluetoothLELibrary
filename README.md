@@ -1,5 +1,7 @@
 #BluetoothLE library
 
+[English](https://github.com/qindachang/QinBluetoothLe/blob/master/README-EN.md "English")
+
 低功耗蓝牙框架。**优势**：
 
 1. **适配**到Android5.0和Android6.0的扫描方式（速度极快）。
