@@ -46,6 +46,8 @@
 
 **三、扫描**
 
+扫描过程携带6.0动态权限：地理位置权限申请
+
     private BluetoothDevice mBluetoothDevice;
 
     mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒，默认10秒
