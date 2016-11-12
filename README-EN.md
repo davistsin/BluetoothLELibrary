@@ -110,18 +110,18 @@ Android 6.0 above
             }
         });
 
-###Disconnect
+###6. Disconnect
 
     mBluetoothLe.disconnect();
 
-###Send data to Characteristic
+###7. Send data to Characteristic
 
     private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String WRITE_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
 
     mBluetoothLe.writeDataToCharacteristic(bytes, SERVICE_UUID, WRITE_UUID);
 
-###Listening the data sent
+###8. Listening the data sent
 
     mBluetoothLe.setOnWriteCharacteristicListener(new OnLeWriteCharacteristicListener() {
             @Override
@@ -136,7 +136,7 @@ Android 6.0 above
             }
         });
 
-###Enable characteristic notification
+###9. Enable characteristic notification
 
 	private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
@@ -144,11 +144,11 @@ Android 6.0 above
 
 	mBluetoothLe.enableBleNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID);
 
-###Enable many characteristic notification
+###10. Enable many characteristic notification
 
     mBluetoothLe.enableBleNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
 
-###Listening characteristic notification
+###11. Listening characteristic notification
 
     mBluetoothLe.setBleNotificationListener(new OnLeNotificationListener() {
             @Override
@@ -162,7 +162,7 @@ Android 6.0 above
             }
         });
 
-###Read data from characteristic
+###12. Read data from characteristic
 
     private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String READ_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
@@ -181,11 +181,11 @@ Android 6.0 above
             }
         });
 
-###Cancel all queue
+###13. Cancel all queue
 
     mBluetoothLe.clearQueue();
 
-###Close GATT
+###14. Close GATT
 
 When you exit app, suggest you call this method.
 
