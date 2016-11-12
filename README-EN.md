@@ -207,3 +207,4 @@ In Activity's onDestroy() call this method.
 ##Contact
 
 E-mail: qindachang@outlook.com
+
