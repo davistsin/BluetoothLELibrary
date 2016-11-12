@@ -206,4 +206,4 @@ In Activity's onDestroy() call this method.
 
 ##Contact
 
-facebook:
+E-mail: qindachang@outlook.com
