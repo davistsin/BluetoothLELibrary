@@ -258,7 +258,7 @@
 
     增加：取消所有队列
 
-3. [Version 0.2.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.2.0")
+3. [Version 0.2.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.2.0.md "Version 0.2.0")
 
     增加：
 
