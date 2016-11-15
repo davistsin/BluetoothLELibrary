@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,6 +96,25 @@ class BleManager {
             bluetoothAdapter.disable();
         }
         return true;
+    }
+
+    boolean clearDeviceCache() {
+        if (mBluetoothGatt == null) {
+            Log.e(TAG, "please connected bluetooth then clear cache.");
+            return false;
+        }
+        try {
+            Method e = BluetoothGatt.class.getMethod("refresh", new Class[0]);
+            if (e != null) {
+                boolean success = ((Boolean) e.invoke(mBluetoothGatt, new Object[0])).booleanValue();
+                Log.i(TAG, "refresh Device Cache: " + success);
+                return success;
+            }
+        } catch (Exception exception) {
+            Log.e(TAG, "An exception occured while refreshing device", exception);
+        }
+
+        return false;
     }
 
     void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,

@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private static final byte[] OPEN_STEP_NOTIFY = {0x06, 0x01};
 
     private Button btn_scan, btn_stop_scan, btn_connect, btn_disconnect, btn_clear, btn_open_notification,
-            btn_write_hr, btn_write_step, btn_read, btn_clear_all, btn_close_all_notify;
+            btn_write_hr, btn_write_step, btn_read, btn_clear_all, btn_close_all_notify, btn_clear_cache;
     private TextView tv_text;
 
     private BluetoothLe mBluetoothLe;
@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         btn_read = (Button) findViewById(R.id.btn_read);
         btn_clear_all = (Button) findViewById(R.id.btn_clear_all);
         btn_close_all_notify = (Button) findViewById(R.id.btn_close_all_notify);
+        btn_clear_cache = (Button) findViewById(R.id.btn_clear_cache);
 
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
         mBluetoothLe.init(this);//必须调用init()初始化
@@ -151,6 +152,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btn_clear_cache.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mBluetoothLe.clearDeviceCache()) {
+                    mStringBuilder.append("清理蓝牙缓存：成功");
+
+                } else {
+                    mStringBuilder.append("清理蓝牙缓存：失败！");
+                }
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
+            }
+        });
+
         mBluetoothLe.setOnReadCharacteristicListener(new OnLeReadCharacteristicListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
@@ -187,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBluetoothLe.destroy();//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
+        mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
     }
 
     //扫描兼容了4.3/5.0/6.0的安卓版本

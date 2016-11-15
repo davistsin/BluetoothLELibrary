@@ -33,7 +33,21 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.1.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.2.0'
+
+**前戏**
+
+判断蓝牙是否打开
+
+    mBluetoothLe.isBluetoothOpen();
+
+请求打开蓝牙
+
+    mBluetoothLe.enableBluetooth(activity.this, true);
+
+关闭蓝牙
+
+    mBluetoothLe.enableBluetooth(activity.this, false);
 
 
 **一、获取单例实例**
@@ -211,6 +225,13 @@
 
     mBluetoothLe.close();
 
+**十三、清理蓝牙缓存**
+
+请你在连接上蓝牙后，再执行这步操作
+
+    mBluetoothLe.clearDeviceCache()
+
+
 ###避免内存泄露
 
 在Activity生命周期onDestroy() 中使用：
@@ -221,8 +242,7 @@
 ##仍在补充
 1. 连续操作发送数据、读取特征、开启通知操作设置优先级，像网络请求一样设置优先级
 2. 蓝牙设备信号强度监听
-3. 清理蓝牙缓存
-4. 连接超时设置，连接不上的情况下自动重连的次数设置
+3. 连接超时设置，连接不上的情况下自动重连的次数设置
 
 ##了解更多
 
@@ -234,4 +254,14 @@
 
 ##版本迭代
 1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")
-2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1") 增加：取消所有队列
+2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1")
+
+增加：取消所有队列
+
+3. [Version 0.2.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.2.0")
+
+增加：
+
+清理蓝牙缓存；
+判断蓝牙是否打开；
+请求打开蓝牙。
