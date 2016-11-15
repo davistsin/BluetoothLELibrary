@@ -2,6 +2,7 @@ package com.qindachang.bluetoothle;
 
 import android.Manifest;
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -9,6 +10,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
@@ -41,9 +43,6 @@ class BleManager {
 
     private static final String TAG = BleManager.class.getSimpleName();
 
-    private static final int MSG_CONNECTED = 24237;
-    private static final int MSG_DISCONNECTED = 21319;
-
     private int REQUEST_PERMISSION_REQ_CODE = 888;
 
     private boolean mConnected;
@@ -73,7 +72,32 @@ class BleManager {
         return mContext;
     }
 
-    public void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
+    boolean isBluetoothOpen() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return bluetoothAdapter.isEnabled();
+    }
+
+    boolean enableBluetooth(Activity activity, boolean enable) {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Log.e(TAG, "your device does not support bluetooth. ");
+            return false;
+        }
+
+        if (enable) {
+            if (bluetoothAdapter.isEnabled()) {
+                Log.d(TAG, "your device has been turn on bluetooth.");
+                return false;
+            }
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            activity.startActivity(intent);
+        } else {
+            bluetoothAdapter.disable();
+        }
+        return true;
+    }
+
+    void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
                      int scanPeriod, int reportDelayMillis, OnLeScanListener onLeScanListener) {
         Log.d(TAG, "bluetooth le scanning...");
         mActivity = activity;
@@ -148,7 +172,6 @@ class BleManager {
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(final int callbackType, final ScanResult result) {
-            Log.d(TAG, "device name :" + result.getDevice().getName());
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onScanResult(result.getDevice(), result.getRssi(), result.getScanRecord());
             }
@@ -156,7 +179,6 @@ class BleManager {
 
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
-            Log.d(TAG, "onBatchScanResults::" + results.toString());
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onBatchScanResults(results);
             }

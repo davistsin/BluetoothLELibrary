@@ -1,3 +1,6 @@
+
+新增功能：取消所有队列。
+
 #BluetoothLE library
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
@@ -188,7 +191,7 @@
     mBluetoothLe.setOnReadCharacteristicListener(new OnLeReadCharacteristicListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
-                
+
             }
 
             @Override
@@ -231,7 +234,3 @@
 3. 邮箱：qindachang@outlook.com
 4. 博客：http://blog.csdn.net/u013003052
 5. Github: https://github.com/qindachang
-
-##版本迭代
-1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")
-2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1") 增加：取消所有队列

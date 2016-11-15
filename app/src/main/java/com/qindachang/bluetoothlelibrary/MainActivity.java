@@ -65,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
 
         mStringBuilder = new StringBuilder();
 
+
+        if (!mBluetoothLe.isBluetoothOpen()) {
+            mBluetoothLe.enableBluetooth(this, true);
+        }
+
         btn_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         btn_read.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         btn_close_all_notify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBluetoothLe.enableBleNotification(false,SERVICE_UUID,new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+                mBluetoothLe.enableBleNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
             }
         });
 

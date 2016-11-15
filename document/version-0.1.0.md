@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.1.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.1.0'
 
 
 **一、获取单例实例**
@@ -188,7 +188,7 @@
     mBluetoothLe.setOnReadCharacteristicListener(new OnLeReadCharacteristicListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
-                
+
             }
 
             @Override
@@ -198,14 +198,7 @@
         });
 
 
-
-**十一、取消队列**
-
-假设当你在for循环中发送100条数据，想要在中途取消余下的发送
-
-    mBluetoothLe.clearQueue();
-
-**十二、关闭GATT**
+**十一、关闭GATT**
 
 在你退出应用的时候使用
 
@@ -231,7 +224,3 @@
 3. 邮箱：qindachang@outlook.com
 4. 博客：http://blog.csdn.net/u013003052
 5. Github: https://github.com/qindachang
-
-##版本迭代
-1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")
-2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1") 增加：取消所有队列

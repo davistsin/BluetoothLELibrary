@@ -34,6 +34,14 @@ public class BluetoothLe {
         mBleManager = new BleManager(mContext);
     }
 
+    public boolean isBluetoothOpen() {
+        return mBleManager.isBluetoothOpen();
+    }
+
+    public void enableBluetooth(Activity activity,boolean enable) {
+        mBleManager.enableBluetooth(activity,enable);
+    }
+
     public BluetoothLe setScanWithDeviceName(String deviceName) {
         this.filterDeviceName = deviceName;
         return this;
