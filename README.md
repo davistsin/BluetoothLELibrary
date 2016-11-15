@@ -256,12 +256,12 @@
 1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")
 2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1")
 
-增加：取消所有队列
+    增加：取消所有队列
 
 3. [Version 0.2.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.2.0")
 
-增加：
+    增加：
 
-清理蓝牙缓存；
-判断蓝牙是否打开；
-请求打开蓝牙。
+    清理蓝牙缓存；
+    判断蓝牙是否打开；
+    请求打开蓝牙。
