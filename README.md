@@ -246,7 +246,7 @@
 
 ##了解更多
 
-1. See Demo
+1. See Demo： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") / [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
 2. QQ: 714275846 / 823951895
 3. 邮箱：qindachang@outlook.com
 4. 博客：http://blog.csdn.net/u013003052
