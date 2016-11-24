@@ -35,6 +35,7 @@
 
 	compile 'com.qindachang:BluetoothLELibrary:0.2.2'
 
+
 **前戏**
 
 判断蓝牙是否打开
