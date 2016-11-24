@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.2.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.2.2'
 
 **前戏**
 
@@ -277,3 +277,4 @@
     请求打开蓝牙。
 
 4. [Version 0.2.1] 增加获取蓝牙连接状态。
+5. [Version 0.2.2] fix bug.

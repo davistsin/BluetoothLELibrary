@@ -16,11 +16,10 @@ public class BluetoothLe {
     private BluetoothLe() {
     }
 
-    public static final BluetoothLe getDefault() {
+    public static BluetoothLe getDefault() {
         return SingletonHolder.INSTANCE;
     }
 
-    private Context mContext;
     private BleManager mBleManager;
 
     private String filterDeviceName;
@@ -30,8 +29,9 @@ public class BluetoothLe {
     private int reportDelayMillis;
 
     public void init(Context context) {
-        mContext = context.getApplicationContext();
-        mBleManager = new BleManager(mContext);
+        if (mBleManager == null) {
+            mBleManager = new BleManager(context.getApplicationContext());
+        }
     }
 
     public boolean isBluetoothOpen() {
