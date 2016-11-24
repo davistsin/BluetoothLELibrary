@@ -241,6 +241,10 @@ class BleManager {
         return true;
     }
 
+    boolean getConnected() {
+        return mConnected;
+    }
+
     void setConnectListener(OnLeConnectListener onLeConnectListener) {
         mOnLeConnectListener = onLeConnectListener;
     }

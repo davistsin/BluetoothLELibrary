@@ -92,6 +92,10 @@ public class BluetoothLe {
         return mBleManager.scanning();
     }
 
+    public boolean getConnected() {
+        return mBleManager.getConnected();
+    }
+
     public BluetoothLe setStopScanAfterConnected(boolean enable) {
         mBleManager.setStopScanAfterConnected(enable);
         return this;

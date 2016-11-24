@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.2.0'
+	compile 'com.qindachang:BluetoothLELibrary:0.2.1'
 
 **前戏**
 
@@ -95,6 +95,11 @@
                     }
                 });
 
+获取蓝牙扫描状态：
+
+    mBluetoothLe.getScanning();
+
+
 **四、停止扫描**
 
     mBluetoothLe.stopBleScan();
@@ -136,6 +141,11 @@
                 tv_text.setText(mStringBuilder.toString());
             }
         });
+
+获取蓝牙连接状态：
+
+    mBluetoothLe.getConnected();
+
 
 **断开连接**
 
@@ -265,3 +275,5 @@
     清理蓝牙缓存；
     判断蓝牙是否打开；
     请求打开蓝牙。
+
+4. [Version 0.2.1] 增加获取蓝牙连接状态。
