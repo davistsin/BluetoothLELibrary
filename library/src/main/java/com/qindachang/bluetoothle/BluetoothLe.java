@@ -2,7 +2,6 @@ package com.qindachang.bluetoothle;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 
 import java.util.UUID;
@@ -13,8 +12,7 @@ public class BluetoothLe {
         private static final BluetoothLe INSTANCE = new BluetoothLe();
     }
 
-    private BluetoothLe() {
-    }
+    private BluetoothLe() {}
 
     public static BluetoothLe getDefault() {
         return SingletonHolder.INSTANCE;
@@ -38,12 +36,16 @@ public class BluetoothLe {
         return mBleManager.isBluetoothOpen();
     }
 
-    public void enableBluetooth(Activity activity,boolean enable) {
-        mBleManager.enableBluetooth(activity,enable);
+    public void enableBluetooth(Activity activity) {
+        mBleManager.enableBluetooth(activity);
+    }
+
+    public void diableBluetooth() {
+        mBleManager.disableBluetooth();
     }
 
     public boolean clearDeviceCache() {
-       return mBleManager.clearDeviceCache();
+        return mBleManager.clearDeviceCache();
     }
 
     public BluetoothLe setScanWithDeviceName(String deviceName) {
@@ -151,10 +153,10 @@ public class BluetoothLe {
     }
 
     public void readCharacteristic(String serviceUUID, String characteristicUUID) {
-        mBleManager.readCharacteristicQueue(UUID.fromString(serviceUUID),UUID.fromString(characteristicUUID));
+        mBleManager.readCharacteristicQueue(UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
     }
 
-    public void readCharacteristic(UUID serviceUUID,UUID characteristicUUID) {
+    public void readCharacteristic(UUID serviceUUID, UUID characteristicUUID) {
         mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
     }
 
@@ -163,7 +165,7 @@ public class BluetoothLe {
     }
 
     public void readCharacteristic(UUID serviceUUID, UUID characteristicUUID, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
-        mBleManager.readCharacteristicQueue(serviceUUID,characteristicUUID);
+        mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
         setOnReadCharacteristicListener(onLeReadCharacteristicListener);
     }
 

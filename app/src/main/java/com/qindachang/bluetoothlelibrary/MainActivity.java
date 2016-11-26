@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (!mBluetoothLe.isBluetoothOpen()) {
-            mBluetoothLe.enableBluetooth(this, true);
+            mBluetoothLe.enableBluetooth(this);
         }
 
         btn_scan.setOnClickListener(new View.OnClickListener() {

@@ -15,21 +15,18 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelUuid;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanCallback;
@@ -62,6 +59,7 @@ class BleManager {
     private OnLeReadCharacteristicListener mOnLeReadCharacteristicListener;
 
     private RequestQueue mRequestQueue = new RequestQueue();
+    private List<Map<String, OnLeScanListener>> scanListenerList = new ArrayList<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -69,33 +67,35 @@ class BleManager {
         mContext = context;
     }
 
-    public Context getContext() {
-        return mContext;
-    }
-
     boolean isBluetoothOpen() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         return bluetoothAdapter.isEnabled();
     }
 
-    boolean enableBluetooth(Activity activity, boolean enable) {
+    boolean enableBluetooth(Activity activity) {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             Log.e(TAG, "your device does not support bluetooth. ");
             return false;
         }
-
-        if (enable) {
-            if (bluetoothAdapter.isEnabled()) {
-                Log.d(TAG, "your device has been turn on bluetooth.");
-                return false;
-            }
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivity(intent);
-        } else {
-            bluetoothAdapter.disable();
+        if (bluetoothAdapter.isEnabled()) {
+            Log.d(TAG, "your device has been turn on bluetooth.");
+            return false;
         }
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        activity.startActivity(intent);
         return true;
+    }
+
+    boolean disableBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter.isEnabled()) {
+            bluetoothAdapter.disable();
+            return true;
+        } else {
+            Log.d(TAG, "your device didn't turn on bluetooth.");
+            return false;
+        }
     }
 
     boolean clearDeviceCache() {
@@ -118,7 +118,7 @@ class BleManager {
     }
 
     void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
-                     int scanPeriod, int reportDelayMillis, OnLeScanListener onLeScanListener) {
+              int scanPeriod, int reportDelayMillis, OnLeScanListener onLeScanListener) {
         Log.d(TAG, "bluetooth le scanning...");
         mActivity = activity;
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -521,6 +521,17 @@ class BleManager {
         mOnLeNotificationListener = null;
         mOnLeWriteCharacteristicListener = null;
         mOnLeReadCharacteristicListener = null;
+    }
+
+    void destroy(String tag) {
+        for (Map<String, OnLeScanListener> map : scanListenerList) {
+            if (map.containsKey(tag)) {
+                scanListenerList.remove(map);
+            }
+
+        }
+
+
     }
 
     void clearQueue() {

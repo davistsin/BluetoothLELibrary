@@ -108,7 +108,7 @@
 **五、连接蓝牙**
 
 	//发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
-	//参数：false为关闭蓝牙断开自动重连，如果为true则自动断开重连
+	//参数：false为关闭蓝牙自动重连，如果为true则自动重连
     mBluetoothLe.startBleConnect(false, mBluetoothDevice, new OnLeConnectListener() {
 
             @Override

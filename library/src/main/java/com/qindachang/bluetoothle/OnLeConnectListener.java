@@ -3,7 +3,7 @@ package com.qindachang.bluetoothle;
 import android.bluetooth.BluetoothGatt;
 
 
-public interface OnLeConnectListener {
+public interface OnLeConnectListener extends LeListener {
 
     void onDeviceConnecting();
 
