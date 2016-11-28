@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         btn_close_all_notify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBluetoothLe.enableBleNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+                mBluetoothLe.enableNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
             }
         });
 
@@ -198,6 +198,64 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
+            @Override
+            public void onDeviceConnecting() {
+                mStringBuilder.append("连接中1");
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
+            }
+
+            @Override
+            public void onDeviceConnected() {
+
+            }
+
+            @Override
+            public void onDeviceDisconnected() {
+
+            }
+
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt) {
+
+            }
+
+            @Override
+            public void onDeviceConnectFail() {
+
+            }
+        });
+
+        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
+            @Override
+            public void onDeviceConnecting() {
+                mStringBuilder.append("连接中2");
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
+            }
+
+            @Override
+            public void onDeviceConnected() {
+
+            }
+
+            @Override
+            public void onDeviceDisconnected() {
+
+            }
+
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt) {
+
+            }
+
+            @Override
+            public void onDeviceConnectFail() {
+
+            }
+        });
     }
 
     @Override
@@ -213,9 +271,9 @@ public class MainActivity extends AppCompatActivity {
     private void scan() {
         mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒
 //                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
-               // .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
+                // .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
-                .startBleScan(this,TAG, new OnLeScanListener() {
+                .startScan(TAG, this, new OnLeScanListener() {
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
                         mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
@@ -244,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopScan() {
-        mBluetoothLe.stopBleScan();
+        mBluetoothLe.stopScan();
         mStringBuilder.append("停止扫描\n");
         tv_text.setText(mStringBuilder.toString());
     }
@@ -252,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
     //有些手机的连接过程比较长，经测试，小米手机连接所花时间最多，有时会在15s左右
     //发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
     private void connect() {
-        mBluetoothLe.startBleConnect(false, mBluetoothDevice, new OnLeConnectListener() {
+        mBluetoothLe.startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
 
             @Override
             public void onDeviceConnecting() {
@@ -293,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openNotification() {
-        mBluetoothLe.enableBleNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID)
+        mBluetoothLe.enableNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID)
                 .setOnNotificationListener(new OnLeNotificationListener() {
                     @Override
                     public void onSuccess(BluetoothGattCharacteristic characteristic) {
@@ -308,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openAllNotification() {
-        mBluetoothLe.enableBleNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+        mBluetoothLe.enableNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
         mBluetoothLe.setOnNotificationListener(new OnLeNotificationListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
@@ -325,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void closeNotification() {
-        mBluetoothLe.enableBleNotification(false, SERVICE_UUID, HEART_NOTIFICATION_UUID);
+        mBluetoothLe.enableNotification(false, SERVICE_UUID, HEART_NOTIFICATION_UUID);
     }
 
     private void sendMsg(byte[] bytes) {

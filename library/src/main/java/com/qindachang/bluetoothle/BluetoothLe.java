@@ -3,9 +3,8 @@ package com.qindachang.bluetoothle;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class BluetoothLe {
@@ -14,7 +13,8 @@ public class BluetoothLe {
         private static final BluetoothLe INSTANCE = new BluetoothLe();
     }
 
-    private BluetoothLe() {}
+    private BluetoothLe() {
+    }
 
     public static BluetoothLe getDefault() {
         return SingletonHolder.INSTANCE;
@@ -80,7 +80,7 @@ public class BluetoothLe {
         return this;
     }
 
-    public void startBleScan(Activity activity, OnLeScanListener onLeScanListener) {
+    public void startScan(Activity activity, OnLeScanListener onLeScanListener) {
         mBleManager.setOnLeScanListener(onLeScanListener);
         mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
         filterDeviceName = null;
@@ -89,10 +89,8 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
-    public void startBleScan(Activity activity, String tag, OnLeScanListener onLeScanListener) {
-        Map<String, OnLeScanListener> map = new HashMap<>();
-        map.put(tag, onLeScanListener);
-        mBleManager.addScanLeListener(map);
+    public void startScan(@NonNull String tag, Activity activity, OnLeScanListener onLeScanListener) {
+        mBleManager.addScanLeListener(tag, onLeScanListener);
         mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
         filterDeviceName = null;
         filterDeviceAddress = null;
@@ -100,7 +98,7 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
-    public void stopBleScan() {
+    public void stopScan() {
         mBleManager.stopScan();
     }
 
@@ -117,23 +115,28 @@ public class BluetoothLe {
         return this;
     }
 
-    public void startBleConnect(BluetoothDevice bluetoothDevice) {
-        startBleConnect(bluetoothDevice, null);
+    public void startConnect(BluetoothDevice bluetoothDevice) {
+        mBleManager.connect(false, bluetoothDevice);
     }
 
-    public void startBleConnect(BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
-        startBleConnect(false, bluetoothDevice, onLeConnectListener);
+    public void startConnect(boolean autoConnect, BluetoothDevice bluetoothDevice) {
+        mBleManager.connect(autoConnect, bluetoothDevice);
     }
 
-    public void startBleConnect(boolean autoConnect, BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
-        mBleManager.connect(autoConnect, bluetoothDevice, onLeConnectListener);
+    public void startConnect(BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
+        startConnect(false, bluetoothDevice, onLeConnectListener);
     }
 
-    public void setBleConnectListener(OnLeConnectListener onLeConnectListener) {
+    public void startConnect(boolean autoConnect, BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
+        setOnConnectListener(onLeConnectListener);
+        mBleManager.connect(autoConnect, bluetoothDevice);
+    }
+
+    public void setOnConnectListener(OnLeConnectListener onLeConnectListener) {
         mBleManager.setConnectListener(onLeConnectListener);
     }
 
-    public void setBleConnectListener(String tag,OnLeConnectListener onLeConnectListener) {
+    public void setOnConnectListener(@NonNull String tag, OnLeConnectListener onLeConnectListener) {
         mBleManager.addConnectListener(tag, onLeConnectListener);
     }
 
@@ -141,27 +144,27 @@ public class BluetoothLe {
         mBleManager.disconnect();
     }
 
-    public BluetoothLe enableBleNotification(boolean enable, String serviceUUID, String characteristicUUID) {
-        enableBleNotification(enable, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
+    public BluetoothLe enableNotification(boolean enable, String serviceUUID, String characteristicUUID) {
+        enableNotification(enable, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
         return this;
     }
 
-    public BluetoothLe enableBleNotification(boolean enable, UUID serviceUUID, UUID characteristicUUID) {
-        enableBleNotification(enable, serviceUUID, new UUID[]{characteristicUUID});
+    public BluetoothLe enableNotification(boolean enable, UUID serviceUUID, UUID characteristicUUID) {
+        enableNotification(enable, serviceUUID, new UUID[]{characteristicUUID});
         return this;
     }
 
-    public BluetoothLe enableBleNotification(boolean enable, String serviceUUID, String[] characteristicUUIDs) {
+    public BluetoothLe enableNotification(boolean enable, String serviceUUID, String[] characteristicUUIDs) {
         int length = characteristicUUIDs.length;
         UUID[] uuids = new UUID[length];
         for (int i = 0; i < length; i++) {
             uuids[i] = UUID.fromString(characteristicUUIDs[i]);
         }
-        enableBleNotification(enable, UUID.fromString(serviceUUID), uuids);
+        enableNotification(enable, UUID.fromString(serviceUUID), uuids);
         return this;
     }
 
-    public BluetoothLe enableBleNotification(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+    public BluetoothLe enableNotification(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
         mBleManager.enableNotificationQueue(enable, serviceUUID, characteristicUUIDs);
         return this;
     }

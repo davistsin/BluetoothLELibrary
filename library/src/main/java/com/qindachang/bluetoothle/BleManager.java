@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -122,7 +123,9 @@ class BleManager {
         return false;
     }
 
-    void addScanLeListener(Map<String,OnLeScanListener> map) {
+    void addScanLeListener(String tag, OnLeScanListener onLeScanListener) {
+        Map<String, OnLeScanListener> map = new HashMap<>();
+        map.put(tag, onLeScanListener);
         scanListenerList.add(map);
     }
 
@@ -209,7 +212,6 @@ class BleManager {
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(final int callbackType, final ScanResult result) {
-            Log.d("debug", "scanListenerList size:" + scanListenerList.size());
             for (Map<String, OnLeScanListener> map : scanListenerList) {
                 for (Map.Entry<String, OnLeScanListener> entry : map.entrySet()) {
                     entry.getValue().onScanResult(result.getDevice(), result.getRssi(), result.getScanRecord());
@@ -246,16 +248,15 @@ class BleManager {
     };
 
 
-    boolean connect(boolean autoConnect, final BluetoothDevice device, OnLeConnectListener onLeConnectListener) {
-        mOnLeConnectListener = onLeConnectListener;
+    boolean connect(boolean autoConnect, final BluetoothDevice device) {
         if (mConnected) {
             Log.d(TAG, "Bluetooth has been connected. connect false.");
-            if (mOnLeConnectListener != null) {
-                for (Map<String, OnLeConnectListener> map : connectListenerList) {
-                    for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
-                        entry.getValue().onDeviceConnectFail();
-                    }
+            for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                    entry.getValue().onDeviceConnectFail();
                 }
+            }
+            if (mOnLeConnectListener != null) {
                 mOnLeConnectListener.onDeviceConnectFail();
             }
             return false;
@@ -448,19 +449,21 @@ class BleManager {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "success with find services discovered .");
-                if (mOnLeConnectListener != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (Map<String, OnLeConnectListener> map : connectListenerList) {
-                                for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
-                                    entry.getValue().onServicesDiscovered(gatt);
-                                }
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                            for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                                entry.getValue().onServicesDiscovered(gatt);
                             }
+                        }
+                        if (mOnLeConnectListener != null) {
                             mOnLeConnectListener.onServicesDiscovered(gatt);
                         }
-                    });
-                }
+                    }
+                });
+
             } else if (status == BluetoothGatt.GATT_FAILURE) {
                 Log.d(TAG, "failure find services discovered.");
             }
