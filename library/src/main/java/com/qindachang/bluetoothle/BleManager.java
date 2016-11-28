@@ -22,6 +22,7 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,10 @@ class BleManager {
 
     private RequestQueue mRequestQueue = new RequestQueue();
     private List<Map<String, OnLeScanListener>> scanListenerList = new ArrayList<>();
+    private List<Map<String, OnLeConnectListener>> connectListenerList = new ArrayList<>();
+    private List<Map<String, OnLeWriteCharacteristicListener>> writeCharacteristicListenerList = new ArrayList<>();
+    private List<Map<String, OnLeReadCharacteristicListener>> readCharacteristicListenerList = new ArrayList<>();
+    private List<Map<String, OnLeNotificationListener>> notificationListnerList = new ArrayList<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -117,8 +122,16 @@ class BleManager {
         return false;
     }
 
+    void addScanLeListener(Map<String,OnLeScanListener> map) {
+        scanListenerList.add(map);
+    }
+
+    void setOnLeScanListener(OnLeScanListener onLeScanListener) {
+        mOnLeScanListener = onLeScanListener;
+    }
+
     void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
-              int scanPeriod, int reportDelayMillis, OnLeScanListener onLeScanListener) {
+              int scanPeriod, int reportDelayMillis) {
         Log.d(TAG, "bluetooth le scanning...");
         mActivity = activity;
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -131,7 +144,6 @@ class BleManager {
                     REQUEST_PERMISSION_REQ_CODE);
             return;
         }
-        mOnLeScanListener = onLeScanListener;
         BluetoothLeScannerCompat scannerCompat = BluetoothLeScannerCompat.getScanner();
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -174,6 +186,11 @@ class BleManager {
             final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
             scanner.stopScan(scanCallback);
             isScanning = false;
+            for (Map<String, OnLeScanListener> map : scanListenerList) {
+                for (Map.Entry<String, OnLeScanListener> entry : map.entrySet()) {
+                    entry.getValue().onScanCompleted();
+                }
+            }
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onScanCompleted();
             }
@@ -192,6 +209,12 @@ class BleManager {
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(final int callbackType, final ScanResult result) {
+            Log.d("debug", "scanListenerList size:" + scanListenerList.size());
+            for (Map<String, OnLeScanListener> map : scanListenerList) {
+                for (Map.Entry<String, OnLeScanListener> entry : map.entrySet()) {
+                    entry.getValue().onScanResult(result.getDevice(), result.getRssi(), result.getScanRecord());
+                }
+            }
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onScanResult(result.getDevice(), result.getRssi(), result.getScanRecord());
             }
@@ -199,6 +222,11 @@ class BleManager {
 
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
+            for (Map<String, OnLeScanListener> map : scanListenerList) {
+                for (Map.Entry<String, OnLeScanListener> entry : map.entrySet()) {
+                    entry.getValue().onBatchScanResults(results);
+                }
+            }
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onBatchScanResults(results);
             }
@@ -206,6 +234,11 @@ class BleManager {
 
         @Override
         public void onScanFailed(final int errorCode) {
+            for (Map<String, OnLeScanListener> map : scanListenerList) {
+                for (Map.Entry<String, OnLeScanListener> entry : map.entrySet()) {
+                    entry.getValue().onScanFailed(errorCode);
+                }
+            }
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onScanFailed(errorCode);
             }
@@ -218,6 +251,11 @@ class BleManager {
         if (mConnected) {
             Log.d(TAG, "Bluetooth has been connected. connect false.");
             if (mOnLeConnectListener != null) {
+                for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                    for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                        entry.getValue().onDeviceConnectFail();
+                    }
+                }
                 mOnLeConnectListener.onDeviceConnectFail();
             }
             return false;
@@ -235,6 +273,11 @@ class BleManager {
         } else {
             mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback);
         }
+        for (Map<String, OnLeConnectListener> map : connectListenerList) {
+            for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                entry.getValue().onDeviceConnecting();
+            }
+        }
         if (mOnLeConnectListener != null) {
             mOnLeConnectListener.onDeviceConnecting();
         }
@@ -247,6 +290,12 @@ class BleManager {
 
     void setConnectListener(OnLeConnectListener onLeConnectListener) {
         mOnLeConnectListener = onLeConnectListener;
+    }
+
+    void addConnectListener(String tag, OnLeConnectListener onLeConnectListener) {
+        Map<String, OnLeConnectListener> map = new HashMap<>();
+        map.put(tag, onLeConnectListener);
+        connectListenerList.add(map);
     }
 
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
@@ -355,6 +404,11 @@ class BleManager {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                            for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                                entry.getValue().onDeviceConnected();
+                            }
+                        }
                         if (mOnLeConnectListener != null) {
                             mOnLeConnectListener.onDeviceConnected();
                         }
@@ -375,6 +429,11 @@ class BleManager {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                            for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                                entry.getValue().onDeviceDisconnected();
+                            }
+                        }
                         if (mOnLeConnectListener != null) {
                             mOnLeConnectListener.onDeviceDisconnected();
                         }
@@ -393,6 +452,11 @@ class BleManager {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            for (Map<String, OnLeConnectListener> map : connectListenerList) {
+                                for (Map.Entry<String, OnLeConnectListener> entry : map.entrySet()) {
+                                    entry.getValue().onServicesDiscovered(gatt);
+                                }
+                            }
                             mOnLeConnectListener.onServicesDiscovered(gatt);
                         }
                     });
@@ -524,13 +588,18 @@ class BleManager {
     }
 
     void destroy(String tag) {
+        mActivity = null;
+        mRequestQueue.cancelAll();
         for (Map<String, OnLeScanListener> map : scanListenerList) {
             if (map.containsKey(tag)) {
                 scanListenerList.remove(map);
             }
-
         }
-
+        for (Map<String, OnLeConnectListener> map : connectListenerList) {
+            if (map.containsKey(tag)) {
+                connectListenerList.remove(map);
+            }
+        }
 
     }
 

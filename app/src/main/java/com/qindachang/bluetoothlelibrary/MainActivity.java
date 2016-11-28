@@ -25,6 +25,8 @@ import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
     private static final String STEP_NOTIFICATION_UUID = "0000fff3-0000-1000-8000-00805f9b34fb";
@@ -201,7 +203,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothLe.destroy();//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
+        mBluetoothLe.destroy();
+        mBluetoothLe.destroy(TAG);//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
         mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
     }
 
@@ -210,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
     private void scan() {
         mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒
 //                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
-                .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
+               // .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
-                .startBleScan(this, new OnLeScanListener() {
+                .startBleScan(this,TAG, new OnLeScanListener() {
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
                         mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
@@ -291,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void openNotification() {
         mBluetoothLe.enableBleNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID)
-                .setBleNotificationListener(new OnLeNotificationListener() {
+                .setOnNotificationListener(new OnLeNotificationListener() {
                     @Override
                     public void onSuccess(BluetoothGattCharacteristic characteristic) {
 
@@ -306,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void openAllNotification() {
         mBluetoothLe.enableBleNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
-        mBluetoothLe.setBleNotificationListener(new OnLeNotificationListener() {
+        mBluetoothLe.setOnNotificationListener(new OnLeNotificationListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));

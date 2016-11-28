@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class BluetoothLe {
@@ -40,7 +42,7 @@ public class BluetoothLe {
         mBleManager.enableBluetooth(activity);
     }
 
-    public void diableBluetooth() {
+    public void disableBluetooth() {
         mBleManager.disableBluetooth();
     }
 
@@ -79,7 +81,19 @@ public class BluetoothLe {
     }
 
     public void startBleScan(Activity activity, OnLeScanListener onLeScanListener) {
-        mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis, onLeScanListener);
+        mBleManager.setOnLeScanListener(onLeScanListener);
+        mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
+        filterDeviceName = null;
+        filterDeviceAddress = null;
+        uFilerServiceUUID = null;
+        scanPeriod = 0;
+    }
+
+    public void startBleScan(Activity activity, String tag, OnLeScanListener onLeScanListener) {
+        Map<String, OnLeScanListener> map = new HashMap<>();
+        map.put(tag, onLeScanListener);
+        mBleManager.addScanLeListener(map);
+        mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
         filterDeviceName = null;
         filterDeviceAddress = null;
         uFilerServiceUUID = null;
@@ -119,6 +133,10 @@ public class BluetoothLe {
         mBleManager.setConnectListener(onLeConnectListener);
     }
 
+    public void setBleConnectListener(String tag,OnLeConnectListener onLeConnectListener) {
+        mBleManager.addConnectListener(tag, onLeConnectListener);
+    }
+
     public void disconnect() {
         mBleManager.disconnect();
     }
@@ -148,7 +166,7 @@ public class BluetoothLe {
         return this;
     }
 
-    public void setBleNotificationListener(OnLeNotificationListener onLeNotificationListener) {
+    public void setOnNotificationListener(OnLeNotificationListener onLeNotificationListener) {
         mBleManager.setOnLeNotificationListener(onLeNotificationListener);
     }
 
@@ -200,6 +218,10 @@ public class BluetoothLe {
 
     public void destroy() {
         mBleManager.destroy();
+    }
+
+    public void destroy(String tag) {
+        mBleManager.destroy(tag);
     }
 
     public void clearQueue() {
