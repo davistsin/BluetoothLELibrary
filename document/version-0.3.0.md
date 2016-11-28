@@ -373,35 +373,4 @@
 
     mBluetoothLe.cancelAllTag();
 
-##仍在补充
-1. 连续操作发送数据、读取特征、开启通知操作设置优先级，像网络请求一样设置优先级
-2. 蓝牙设备信号强度监听
-3. 连接超时设置，连接不上的情况下自动重连的次数设置
 
-##了解更多
-
-1. See Demo： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") / [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
-2. QQ: 714275846 / 823951895
-3. 邮箱：qindachang@outlook.com
-4. 博客：http://blog.csdn.net/u013003052
-5. Github: https://github.com/qindachang
-
-##版本迭代
-1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")
-2. [Version 0.1.1](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.1.md "Version 0.1.1")
-
-    增加：取消所有队列
-
-3. [Version 0.2.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.2.0.md "Version 0.2.0")
-
-    增加：
-
-    清理蓝牙缓存；
-    判断蓝牙是否打开；
-    请求打开蓝牙。
-
-4. [Version 0.2.1] 增加获取蓝牙连接状态。
-5. [Version 0.2.2] fix bug.
-6. [Version 0.3.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.3.0.md "Version 0.3.0")
-
-    增加：类似volley的TAG，可以取消对应TAG的监听，避免内存泄露。
