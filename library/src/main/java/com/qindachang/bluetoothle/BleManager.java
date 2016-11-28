@@ -124,12 +124,16 @@ class BleManager {
 
     void addScanLeListener(String tag, OnLeScanListener onLeScanListener) {
         if (scanListenerList.size() > 0) {
+            boolean canAdd = true;
             for (Map<String, OnLeScanListener> map : scanListenerList) {
-                if (!map.containsKey(tag)) {
-                    Map<String, OnLeScanListener> map2 = new HashMap<>();
-                    map2.put(tag, onLeScanListener);
-                    scanListenerList.add(map2);
+                if (map.containsKey(tag)) {
+                    canAdd = false;
                 }
+            }
+            if (canAdd) {
+                Map<String, OnLeScanListener> map2 = new HashMap<>();
+                map2.put(tag, onLeScanListener);
+                scanListenerList.add(map2);
             }
         } else {
             Map<String, OnLeScanListener> map3 = new HashMap<>();
