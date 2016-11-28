@@ -89,7 +89,7 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
-    public void startScan(@NonNull String tag, Activity activity, OnLeScanListener onLeScanListener) {
+    public void startScan(@NonNull Object tag, Activity activity, OnLeScanListener onLeScanListener) {
         mBleManager.addScanLeListener(tag, onLeScanListener);
         mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
         filterDeviceName = null;
@@ -136,7 +136,7 @@ public class BluetoothLe {
         mBleManager.setConnectListener(onLeConnectListener);
     }
 
-    public void setOnConnectListener(@NonNull String tag, OnLeConnectListener onLeConnectListener) {
+    public void setOnConnectListener(@NonNull Object tag, OnLeConnectListener onLeConnectListener) {
         mBleManager.addConnectListener(tag, onLeConnectListener);
     }
 
@@ -173,7 +173,7 @@ public class BluetoothLe {
         mBleManager.setOnLeNotificationListener(onLeNotificationListener);
     }
 
-    public void setOnNotificationListener(String tag, OnLeNotificationListener onLeNotificationListener) {
+    public void setOnNotificationListener(@NonNull Object tag, OnLeNotificationListener onLeNotificationListener) {
         mBleManager.addNotificationListener(tag, onLeNotificationListener);
     }
 
@@ -198,6 +198,10 @@ public class BluetoothLe {
         mBleManager.setOnLeReadCharacteristicListener(onReadCharacteristicListener);
     }
 
+    public void setOnReadCharacteristicListener(@NonNull Object tag, OnLeReadCharacteristicListener onReadCharacteristicListener) {
+        mBleManager.addReadCharacteristicListener(tag, onReadCharacteristicListener);
+    }
+
     public void writeDataToCharacteristic(byte[] bytes, String serviceUUID, String characteristicUUID) {
         writeDataToCharacteristic(bytes, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
     }
@@ -219,7 +223,7 @@ public class BluetoothLe {
         mBleManager.setWriteCharacteristicListener(onLeWriteCharacteristicListener);
     }
 
-    public void setOnWriteCharacteristicListener(Object tag, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
+    public void setOnWriteCharacteristicListener(@NonNull Object tag, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         mBleManager.addWriteCharacteristicListener(tag, onLeWriteCharacteristicListener);
     }
 
@@ -231,11 +235,11 @@ public class BluetoothLe {
         mBleManager.destroy();
     }
 
-    public void destroy(String tag) {
+    public void destroy(@NonNull Object tag) {
         mBleManager.destroy(tag);
     }
 
-    public void cancelTag(Object tag) {
+    public void cancelTag(@NonNull Object tag) {
         mBleManager.cancelTag(tag);
     }
 

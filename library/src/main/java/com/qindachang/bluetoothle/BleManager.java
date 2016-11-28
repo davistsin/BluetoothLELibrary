@@ -400,6 +400,12 @@ class BleManager {
         mOnLeReadCharacteristicListener = onLeReadCharacteristicListener;
     }
 
+    void addReadCharacteristicListener(Object tag, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
+        Map<Object, OnLeReadCharacteristicListener> map = new HashMap<>();
+        map.put(tag, onLeReadCharacteristicListener);
+        readCharacteristicListenerList.add(map);
+    }
+
     void disconnect() {
         if (mConnected && mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
@@ -499,32 +505,54 @@ class BleManager {
             super.onCharacteristicRead(gatt, characteristic, status);
             //read
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (mOnLeReadCharacteristicListener != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        for (Map<Object, OnLeReadCharacteristicListener> map : readCharacteristicListenerList) {
+                            for (Map.Entry<Object, OnLeReadCharacteristicListener> entry : map.entrySet()) {
+                                entry.getValue().onSuccess(characteristic);
+                            }
+                        }
+                        if (mOnLeReadCharacteristicListener != null) {
                             mOnLeReadCharacteristicListener.onSuccess(characteristic);
                         }
-                    });
-                }
+                    }
+                });
+
             } else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
-                if (mOnLeReadCharacteristicListener != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Map<Object, OnLeReadCharacteristicListener> map : readCharacteristicListenerList) {
+                            for (Map.Entry<Object, OnLeReadCharacteristicListener> entry : map.entrySet()) {
+                                entry.getValue().onFailure("Phone has lost bonding information", status);
+                            }
+                        }
+                        if (mOnLeReadCharacteristicListener != null) {
                             mOnLeReadCharacteristicListener.onFailure("Phone has lost bonding information", status);
                         }
-                    });
-                }
+                    }
+                });
+
             } else {
-                if (mOnLeReadCharacteristicListener != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Map<Object, OnLeReadCharacteristicListener> map : readCharacteristicListenerList) {
+                            for (Map.Entry<Object, OnLeReadCharacteristicListener> entry : map.entrySet()) {
+                                entry.getValue().onFailure("Error on reading characteristic", status);
+                            }
+                        }
+                        if (mOnLeReadCharacteristicListener != null) {
                             mOnLeReadCharacteristicListener.onFailure("Error on reading characteristic", status);
                         }
-                    });
-                }
+                    }
+                });
+
             }
             mRequestQueue.next();
         }
