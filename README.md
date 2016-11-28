@@ -44,11 +44,11 @@
 
 请求打开蓝牙
 
-    mBluetoothLe.enableBluetooth(activity.this, true);
+    mBluetoothLe.enableBluetooth(activity.this;
 
 关闭蓝牙
 
-    mBluetoothLe.enableBluetooth(activity.this, false);
+    mBluetoothLe.disableBluetooth();
 
 
 **一、获取单例实例**
@@ -69,7 +69,7 @@
                 .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
-                .startBleScan(this, new OnLeScanListener() {
+                .startScan(this, new OnLeScanListener() {
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
                         mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
@@ -96,6 +96,42 @@
                     }
                 });
 
+由于使用了单例，单例的生命长度与APP的一致，比activity长。当activity应被回收时，为避免单例的listener回调持有引用，导致activity不能正常被回收，从而引发内存泄露，
+所以在每一个listener前增加一个tag标志，类似于volley，在onDestroy()方法中取消掉对应的tag，可避免内存泄露。
+
+
+    mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒，默认10秒
+                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
+                .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
+                .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
+                .startScan(TAG, this, new OnLeScanListener() {
+                    @Override
+                    public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
+                        mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
+                        tv_text.setText(mStringBuilder.toString());
+                        mBluetoothDevice = bluetoothDevice;
+                    }
+
+                    @Override
+                    public void onBatchScanResults(List<ScanResult> results) {
+                        mStringBuilder.append("批处理信息：" + results.toString() + "\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
+
+                    @Override
+                    public void onScanCompleted() {
+                        mStringBuilder.append("扫描结束\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
+
+                    @Override
+                    public void onScanFailed(int code) {
+                        mStringBuilder.append("扫描错误\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
+                });
+
+
 获取蓝牙扫描状态：
 
     mBluetoothLe.getScanning();
@@ -103,13 +139,13 @@
 
 **四、停止扫描**
 
-    mBluetoothLe.stopBleScan();
+    mBluetoothLe.stopScan();
 
 **五、连接蓝牙**
 
 	//发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
 	//参数：false为关闭蓝牙自动重连，如果为true则自动重连
-    mBluetoothLe.startBleConnect(false, mBluetoothDevice, new OnLeConnectListener() {
+    mBluetoothLe.startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
 
             @Override
             public void onDeviceConnecting() {
@@ -142,6 +178,47 @@
                 tv_text.setText(mStringBuilder.toString());
             }
         });
+
+使用tag：监听连接
+
+    mBluetoothLe.startConnect(false, mBluetoothDevice);
+
+    mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
+         @Override
+         public void onDeviceConnecting() {
+                    mStringBuilder.append("连接中1");
+                    mStringBuilder.append("\n");
+                    tv_text.setText(mStringBuilder.toString());
+         }
+
+         @Override
+         public void onDeviceConnected() {
+                    mStringBuilder.append("已连接1");
+                    mStringBuilder.append("\n");
+                    tv_text.setText(mStringBuilder.toString());
+                }
+
+         @Override
+         public void onDeviceDisconnected() {
+                    mStringBuilder.append("断开连接1");
+                    mStringBuilder.append("\n");
+                    tv_text.setText(mStringBuilder.toString());
+         }
+
+         @Override
+         public void onServicesDiscovered(BluetoothGatt gatt) {
+                    mStringBuilder.append("发现服务1");
+                    mStringBuilder.append("\n");
+                    tv_text.setText(mStringBuilder.toString());
+         }
+
+         @Override
+         public void onDeviceConnectFail() {
+                    mStringBuilder.append("连接失败1");
+                    mStringBuilder.append("\n");
+                    tv_text.setText(mStringBuilder.toString());
+                }
+    });
 
 获取蓝牙连接状态：
 
@@ -177,21 +254,35 @@
             }
         });
 
+使用tag：
+
+    mBluetoothLe.setOnWriteCharacteristicListener(TAG, new OnLeWriteCharacteristicListener() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+            }
+
+            @Override
+            public void onFailed(String msg, int status) {
+
+            }
+        });
+
 **七、开启通知**
 
 	private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
     private static final String STEP_NOTIFICATION_UUID = "0000fff3-0000-1000-8000-00805f9b34fb";
 
-	mBluetoothLe.enableBleNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID);
+	mBluetoothLe.enableNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID);
 
 **八、开启多个通知**
 
-    mBluetoothLe.enableBleNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+    mBluetoothLe.enableNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
 
 **九、监听通知**
 
-    mBluetoothLe.setBleNotificationListener(new OnLeNotificationListener() {
+    mBluetoothLe.setOnNotificationListener(new OnLeNotificationListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
@@ -201,7 +292,21 @@
             public void onFailure() {
 
             }
-        });
+    });
+
+使用tag：
+
+    mBluetoothLe.setOnNotificationListener(TAG, new OnLeNotificationListener() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+                Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+    });
 
 **十、读取数据**
 
@@ -209,6 +314,8 @@
     private static final String READ_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
 
     mBluetoothLe.readCharacteristic(SERVICE_UUID, READ_UUID);
+
+监听读取：
 
     mBluetoothLe.setOnReadCharacteristicListener(new OnLeReadCharacteristicListener() {
             @Override
@@ -220,8 +327,21 @@
             public void onFailure(String info, int status) {
 
             }
-        });
+    );
 
+使用tag：
+
+    mBluetoothLe.setOnReadCharacteristicListener(TAG, new OnLeReadCharacteristicListener() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+            }
+
+            @Override
+            public void onFailure(String info, int status) {
+
+            }
+    );
 
 
 **十一、取消队列**
@@ -249,6 +369,17 @@
 
 	mBluetoothLe.destroy();
 
+在对应 Activity 中，取消所有TAG:
+
+    mBluetoothLe.destroy(TAG);
+
+取消对应tag：
+
+    mBluetoothLe.cancelTag(TAG);
+
+取消全部tag：
+
+    mBluetoothLe.cancelAllTag();
 
 ##仍在补充
 1. 连续操作发送数据、读取特征、开启通知操作设置优先级，像网络请求一样设置优先级

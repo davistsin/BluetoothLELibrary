@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mBluetoothLe.setOnConnectListener(null, new OnLeConnectListener() {
+        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
             @Override
             public void onDeviceConnecting() {
                 mStringBuilder.append("连接中1");
@@ -237,6 +237,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        mBluetoothLe.setOnWriteCharacteristicListener(TAG, new OnLeWriteCharacteristicListener() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+            }
+
+            @Override
+            public void onFailed(String msg, int status) {
+
+            }
+        });
+
     }
 
     @Override
@@ -245,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
         mBluetoothLe.destroy();
         mBluetoothLe.destroy(TAG);//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
         mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
+        mBluetoothLe.cancelAllTag();
     }
 
     //扫描兼容了4.3/5.0/6.0的安卓版本
@@ -352,7 +365,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+
+
     }
+
 
     private void closeNotification() {
         mBluetoothLe.enableNotification(false, SERVICE_UUID, HEART_NOTIFICATION_UUID);
