@@ -49,7 +49,6 @@ class BleManager {
     private boolean isStopScanAfterConnected;
 
     private Context mContext;
-    private Activity mActivity;
 
     private BluetoothGatt mBluetoothGatt;
 
@@ -149,13 +148,12 @@ class BleManager {
     void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
               int scanPeriod, int reportDelayMillis) {
         Log.d(TAG, "bluetooth le scanning...");
-        mActivity = activity;
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 return;
             }
-            ActivityCompat.requestPermissions(mActivity,
+            ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_PERMISSION_REQ_CODE);
             return;
@@ -657,8 +655,6 @@ class BleManager {
     };
 
     void destroy() {
-        mActivity = null;
-        mRequestQueue.cancelAll();
         mOnLeScanListener = null;
         mOnLeConnectListener = null;
         mOnLeNotificationListener = null;
@@ -667,8 +663,6 @@ class BleManager {
     }
 
     void destroy(Object tag) {
-        mActivity = null;
-        mRequestQueue.cancelAll();
         cancelTag(tag);
     }
 
@@ -693,6 +687,11 @@ class BleManager {
                 writeCharacteristicListenerList.remove(map);
             }
         }
+        for (Map<Object, OnLeReadCharacteristicListener> map : readCharacteristicListenerList) {
+            if (map.containsKey(tag)) {
+                readCharacteristicListenerList.remove(map);
+            }
+        }
     }
 
     void cancelAllTag() {
@@ -700,6 +699,7 @@ class BleManager {
         connectListenerList.clear();
         notificationListenerList.clear();
         writeCharacteristicListenerList.clear();
+        readCharacteristicListenerList.clear();
     }
 
     void clearQueue() {
