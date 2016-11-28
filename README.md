@@ -44,7 +44,7 @@
 
 请求打开蓝牙
 
-    mBluetoothLe.enableBluetooth(activity.this;
+    mBluetoothLe.enableBluetooth(activity.this);
 
 关闭蓝牙
 
@@ -288,10 +288,6 @@
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
             }
 
-            @Override
-            public void onFailure() {
-
-            }
     });
 
 使用tag：
@@ -302,10 +298,6 @@
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
             }
 
-            @Override
-            public void onFailure() {
-
-            }
     });
 
 **十、读取数据**
@@ -369,7 +361,7 @@
 
 	mBluetoothLe.destroy();
 
-在对应 Activity 中，取消所有TAG:
+如果你使用了tag，使用: （它的好处是你可以在多个界面产生多个相同的回调）
 
     mBluetoothLe.destroy(TAG);
 
