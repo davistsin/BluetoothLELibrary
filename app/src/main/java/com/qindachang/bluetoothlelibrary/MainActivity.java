@@ -304,39 +304,43 @@ public class MainActivity extends AppCompatActivity {
     //有些手机的连接过程比较长，经测试，小米手机连接所花时间最多，有时会在15s左右
     //发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
     private void connect() {
-        mBluetoothLe.startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
+        mBluetoothLe.setRetryConnectEnable(true)//设置尝试重新连接
+                .setRetryConnectCount(3)//重试连接次数
+                .setConnectTimeOut(5000)//连接超时，单位毫秒
+                .setServiceDiscoverTimeOut(5000)//发现服务超时，单位毫秒
+                .startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
 
-            @Override
-            public void onDeviceConnecting() {
-                mStringBuilder.append("连接中...\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
+                    @Override
+                    public void onDeviceConnecting() {
+                        mStringBuilder.append("连接中...\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
 
-            @Override
-            public void onDeviceConnected() {
-                mStringBuilder.append("成功连接！\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
+                    @Override
+                    public void onDeviceConnected() {
+                        mStringBuilder.append("成功连接！\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
 
 
-            @Override
-            public void onDeviceDisconnected() {
-                mStringBuilder.append("断开连接！\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
+                    @Override
+                    public void onDeviceDisconnected() {
+                        mStringBuilder.append("断开连接！\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
 
-            @Override
-            public void onServicesDiscovered(BluetoothGatt gatt) {
-                mStringBuilder.append("发现服务啦\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
+                    @Override
+                    public void onServicesDiscovered(BluetoothGatt gatt) {
+                        mStringBuilder.append("发现服务啦\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
 
-            @Override
-            public void onDeviceConnectFail() {
-                mStringBuilder.append("连接失败~~\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-        });
+                    @Override
+                    public void onDeviceConnectFail() {
+                        mStringBuilder.append("连接失败~~\n");
+                        tv_text.setText(mStringBuilder.toString());
+                    }
+                });
     }
 
     private void disconnect() {

@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.3.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.3.2'
 
 
 **前戏**
@@ -145,7 +145,11 @@
 
 	//发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
 	//参数：false为关闭蓝牙自动重连，如果为true则自动重连
-    mBluetoothLe.startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
+    mBluetoothLe.setRetryConnectEnable(true)//设置尝试重新连接
+        .setRetryConnectCount(3)//重试连接次数
+        .setConnectTimeOut(5000)//连接超时，单位毫秒
+        .setServiceDiscoverTimeOut(5000)//发现服务超时，单位毫秒
+        .startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
 
             @Override
             public void onDeviceConnecting() {
@@ -405,3 +409,6 @@
 6. [Version 0.3.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.3.0.md "Version 0.3.0")
 
     增加：类似volley的TAG，可以取消对应TAG的监听，避免内存泄露。
+7. [Version 0.3.2]
+
+    增加：连接超时设置，连接不上的情况下尝试重连的次数设置，或者发现不了服务情况尝试重连次数

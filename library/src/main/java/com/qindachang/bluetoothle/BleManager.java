@@ -44,9 +44,17 @@ class BleManager {
 
     private int REQUEST_PERMISSION_REQ_CODE = 888;
 
-    private boolean mConnected;
-    private boolean isScanning;
     private boolean isStopScanAfterConnected;
+    private boolean isScanning;
+    private boolean mConnected;
+    private boolean mServiceDiscovered;
+    private boolean mRetryConnectEnable;
+    private int mRetryConnectCount = 1;
+    private int connectTimeoutMillis;
+    private int serviceTimeoutMillis;
+
+    private boolean mAutoConnect;
+    private BluetoothDevice mBluetoothDevice;
 
     private Context mContext;
 
@@ -258,8 +266,25 @@ class BleManager {
         }
     };
 
+    void setRetryConnectEnable(boolean retryConnectEnable) {
+        mRetryConnectEnable = retryConnectEnable;
+    }
+
+    void setConnectTimeoutMillis(int connectTimeoutMillis) {
+        this.connectTimeoutMillis = connectTimeoutMillis;
+    }
+
+    void setServiceTimeoutMillis(int serviceTimeoutMillis) {
+        this.serviceTimeoutMillis = serviceTimeoutMillis;
+    }
+
+    void setRetryConnectCount(int retryConnectCount) {
+        mRetryConnectCount = retryConnectCount;
+    }
 
     boolean connect(boolean autoConnect, final BluetoothDevice device) {
+        mAutoConnect = autoConnect;
+        mBluetoothDevice = device;
         if (mConnected) {
             Log.d(TAG, "Bluetooth has been connected. connect false.");
             for (Map<Object, OnLeConnectListener> map : connectListenerList) {
@@ -293,7 +318,25 @@ class BleManager {
         if (mOnLeConnectListener != null) {
             mOnLeConnectListener.onDeviceConnecting();
         }
+
+        checkConnected();
+
         return true;
+    }
+
+    private void checkConnected() {
+        if (mRetryConnectEnable && mRetryConnectCount > 0 && connectTimeoutMillis > 0) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    boolean connected = getConnected();
+                    if (!connected) {
+                        connect(mAutoConnect, mBluetoothDevice);
+                        mRetryConnectCount = mRetryConnectCount - 1;
+                    }
+                }
+            }, connectTimeoutMillis);
+        }
     }
 
     boolean getConnected() {
@@ -408,6 +451,7 @@ class BleManager {
         if (mConnected && mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
             mConnected = false;
+            mServiceDiscovered = false;
         }
     }
 
@@ -416,6 +460,21 @@ class BleManager {
             mBluetoothGatt.close();
             mBluetoothGatt = null;
             mConnected = false;
+            mServiceDiscovered = false;
+        }
+    }
+
+    private void checkServiceDiscover() {
+        if (mRetryConnectEnable && mRetryConnectCount > 0 && serviceTimeoutMillis > 0) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!mServiceDiscovered) {
+                        connect(mAutoConnect, mBluetoothDevice);
+                        mRetryConnectCount -= 1;
+                    }
+                }
+            }, serviceTimeoutMillis);
         }
     }
 
@@ -450,9 +509,11 @@ class BleManager {
                     public void run() {
                         if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
                             mBluetoothGatt.discoverServices();
+                            checkServiceDiscover();
                         }
                     }
                 }, 600);
+
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "device disconnect.");
                 mConnected = false;
@@ -478,7 +539,7 @@ class BleManager {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "success with find services discovered .");
-
+                mServiceDiscovered = true;
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -495,6 +556,7 @@ class BleManager {
 
             } else if (status == BluetoothGatt.GATT_FAILURE) {
                 Log.d(TAG, "failure find services discovered.");
+                mServiceDiscovered = false;
             }
         }
 

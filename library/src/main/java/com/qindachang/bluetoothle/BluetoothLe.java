@@ -115,6 +115,26 @@ public class BluetoothLe {
         return this;
     }
 
+    public BluetoothLe setConnectTimeOut(int millisecond) {
+        mBleManager.setConnectTimeoutMillis(millisecond);
+        return this;
+    }
+
+    public BluetoothLe setServiceDiscoverTimeOut(int millisecond) {
+        mBleManager.setServiceTimeoutMillis(millisecond);
+        return this;
+    }
+
+    public BluetoothLe setRetryConnectEnable(boolean enable) {
+        mBleManager.setRetryConnectEnable(enable);
+        return this;
+    }
+
+    public BluetoothLe setRetryConnectCount(int count) {
+        mBleManager.setRetryConnectCount(count);
+        return this;
+    }
+
     public void startConnect(BluetoothDevice bluetoothDevice) {
         mBleManager.connect(false, bluetoothDevice);
     }
