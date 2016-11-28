@@ -64,7 +64,7 @@ class BleManager {
     private List<Map<Object, OnLeConnectListener>> connectListenerList = new ArrayList<>();
     private List<Map<Object, OnLeWriteCharacteristicListener>> writeCharacteristicListenerList = new ArrayList<>();
     private List<Map<Object, OnLeReadCharacteristicListener>> readCharacteristicListenerList = new ArrayList<>();
-    private List<Map<Object, OnLeNotificationListener>> notificationListnerList = new ArrayList<>();
+    private List<Map<Object, OnLeNotificationListener>> notificationListenerList = new ArrayList<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -344,7 +344,7 @@ class BleManager {
     void addNotificationListener(Object tag, OnLeNotificationListener onLeNotificationListener) {
         Map<Object, OnLeNotificationListener> map = new HashMap<>();
         map.put(tag, onLeNotificationListener);
-        notificationListnerList.add(map);
+        notificationListenerList.add(map);
     }
 
     void writeCharacteristicQueue(byte[] bytes, UUID serviceUUID, UUID characteristicUUID) {
@@ -588,7 +588,7 @@ class BleManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    for (Map<Object, OnLeNotificationListener> map : notificationListnerList) {
+                    for (Map<Object, OnLeNotificationListener> map : notificationListenerList) {
                         for (Map.Entry<Object, OnLeNotificationListener> entry : map.entrySet()) {
                             entry.getValue().onSuccess(characteristic);
                         }
@@ -655,9 +655,14 @@ class BleManager {
                 connectListenerList.remove(map);
             }
         }
-        for (Map<Object, OnLeNotificationListener> map : notificationListnerList) {
+        for (Map<Object, OnLeNotificationListener> map : notificationListenerList) {
             if (map.containsKey(tag)) {
-                notificationListnerList.remove(map);
+                notificationListenerList.remove(map);
+            }
+        }
+        for (Map<Object, OnLeWriteCharacteristicListener> map : writeCharacteristicListenerList) {
+            if (map.containsKey(tag)) {
+                writeCharacteristicListenerList.remove(map);
             }
         }
     }
@@ -665,7 +670,8 @@ class BleManager {
     void cancelAllTag() {
         scanListenerList.clear();
         connectListenerList.clear();
-        notificationListnerList.clear();
+        notificationListenerList.clear();
+        writeCharacteristicListenerList.clear();
     }
 
     void clearQueue() {
