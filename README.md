@@ -2,7 +2,7 @@
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
 
-低功耗蓝牙框架。**优势**：
+低功耗蓝牙库。**优势**：
 
 1. **适配**到Android5.0和Android6.0的扫描方式（速度极快）。
 2. 适配小米手机连接蓝牙操作。
