@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -124,9 +123,19 @@ class BleManager {
     }
 
     void addScanLeListener(String tag, OnLeScanListener onLeScanListener) {
-        Map<String, OnLeScanListener> map = new HashMap<>();
-        map.put(tag, onLeScanListener);
-        scanListenerList.add(map);
+        if (scanListenerList.size() > 0) {
+            for (Map<String, OnLeScanListener> map : scanListenerList) {
+                if (!map.containsKey(tag)) {
+                    Map<String, OnLeScanListener> map2 = new HashMap<>();
+                    map2.put(tag, onLeScanListener);
+                    scanListenerList.add(map2);
+                }
+            }
+        } else {
+            Map<String, OnLeScanListener> map3 = new HashMap<>();
+            map3.put(tag, onLeScanListener);
+            scanListenerList.add(map3);
+        }
     }
 
     void setOnLeScanListener(OnLeScanListener onLeScanListener) {

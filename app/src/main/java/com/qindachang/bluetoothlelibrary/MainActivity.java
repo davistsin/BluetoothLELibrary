@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
+        mBluetoothLe.setOnConnectListener(null, new OnLeConnectListener() {
             @Override
             public void onDeviceConnecting() {
                 mStringBuilder.append("连接中1");
@@ -209,53 +209,34 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDeviceConnected() {
-
-            }
-
-            @Override
-            public void onDeviceDisconnected() {
-
-            }
-
-            @Override
-            public void onServicesDiscovered(BluetoothGatt gatt) {
-
-            }
-
-            @Override
-            public void onDeviceConnectFail() {
-
-            }
-        });
-
-        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
-            @Override
-            public void onDeviceConnecting() {
-                mStringBuilder.append("连接中2");
+                mStringBuilder.append("已连接1");
                 mStringBuilder.append("\n");
                 tv_text.setText(mStringBuilder.toString());
             }
 
             @Override
-            public void onDeviceConnected() {
-
-            }
-
-            @Override
             public void onDeviceDisconnected() {
-
+                mStringBuilder.append("断开连接1");
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onServicesDiscovered(BluetoothGatt gatt) {
-
+                mStringBuilder.append("发现服务1");
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onDeviceConnectFail() {
-
+                mStringBuilder.append("连接失败1");
+                mStringBuilder.append("\n");
+                tv_text.setText(mStringBuilder.toString());
             }
         });
+
+
     }
 
     @Override
