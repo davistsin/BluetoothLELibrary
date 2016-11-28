@@ -6,5 +6,4 @@ import android.bluetooth.BluetoothGattCharacteristic;
 public interface OnLeNotificationListener extends LeListener{
     void onSuccess(BluetoothGattCharacteristic characteristic);
 
-    void onFailure();
 }

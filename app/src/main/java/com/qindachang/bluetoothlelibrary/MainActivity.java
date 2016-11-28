@@ -338,11 +338,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(BluetoothGattCharacteristic characteristic) {
 
                     }
-
-                    @Override
-                    public void onFailure() {
-
-                    }
                 });
     }
 
@@ -356,10 +351,6 @@ public class MainActivity extends AppCompatActivity {
                 tv_text.setText(mStringBuilder.toString());
             }
 
-            @Override
-            public void onFailure() {
-
-            }
         });
     }
 

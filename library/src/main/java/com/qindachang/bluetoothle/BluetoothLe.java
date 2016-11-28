@@ -173,6 +173,10 @@ public class BluetoothLe {
         mBleManager.setOnLeNotificationListener(onLeNotificationListener);
     }
 
+    public void setOnNotificationListener(String tag, OnLeNotificationListener onLeNotificationListener) {
+        mBleManager.addNotificationListener(tag, onLeNotificationListener);
+    }
+
     public void readCharacteristic(String serviceUUID, String characteristicUUID) {
         mBleManager.readCharacteristicQueue(UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
     }
@@ -215,6 +219,10 @@ public class BluetoothLe {
         mBleManager.setWriteCharacteristicListener(onLeWriteCharacteristicListener);
     }
 
+    public void setOnWriteCharacteristicListener(Object tag, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
+        mBleManager.addWriteCharacteristicListener(tag, onLeWriteCharacteristicListener);
+    }
+
     public void close() {
         mBleManager.close();
     }
@@ -225,6 +233,14 @@ public class BluetoothLe {
 
     public void destroy(String tag) {
         mBleManager.destroy(tag);
+    }
+
+    public void cancelTag(Object tag) {
+        mBleManager.cancelTag(tag);
+    }
+
+    public void cancelAllTag() {
+        mBleManager.cancelAllTag();
     }
 
     public void clearQueue() {
