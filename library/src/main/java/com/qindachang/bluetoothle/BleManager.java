@@ -42,6 +42,8 @@ class BleManager {
 
     private static final String TAG = BleManager.class.getSimpleName();
 
+    private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
     private int REQUEST_PERMISSION_REQ_CODE = 888;
 
     private boolean isStopScanAfterConnected;
@@ -343,6 +345,10 @@ class BleManager {
         return mConnected;
     }
 
+    boolean getServicesDiscovered() {
+        return mServiceDiscovered;
+    }
+
     void setConnectListener(OnLeConnectListener onLeConnectListener) {
         mOnLeConnectListener = onLeConnectListener;
     }
@@ -353,7 +359,6 @@ class BleManager {
         connectListenerList.add(map);
     }
 
-    private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private boolean enableNotification(boolean enable, BluetoothGattCharacteristic characteristic) {
         final BluetoothGatt gatt = mBluetoothGatt;
@@ -517,6 +522,7 @@ class BleManager {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "device disconnect.");
                 mConnected = false;
+                mServiceDiscovered = false;
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {

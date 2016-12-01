@@ -33,7 +33,7 @@
 
 **引入方式**
 
-	compile 'com.qindachang:BluetoothLELibrary:0.3.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.3.3'
 
 
 **前戏**
@@ -227,6 +227,10 @@
 获取蓝牙连接状态：
 
     mBluetoothLe.getConnected();
+
+获取发现服务状态：
+
+    mBluetoothLe.getServicesDiscovered();
 
 
 **断开连接**
