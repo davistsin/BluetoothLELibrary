@@ -2,6 +2,7 @@ package com.qindachang.bluetoothle;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -108,6 +109,14 @@ public class BluetoothLe {
 
     public boolean getConnected() {
         return mBleManager.getConnected();
+    }
+
+    public BluetoothDevice getConnectedBluetoothDevice() {
+        return mBleManager.getBluetoothDevice();
+    }
+
+    public BluetoothGatt getBluetoothGatt() {
+        return mBleManager.getBluetoothGatt();
     }
 
     public boolean getServicesDiscovered() {

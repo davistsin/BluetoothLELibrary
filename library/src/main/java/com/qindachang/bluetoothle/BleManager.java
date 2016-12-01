@@ -326,6 +326,17 @@ class BleManager {
         return true;
     }
 
+    BluetoothDevice getBluetoothDevice() {
+        if (mConnected) {
+            return mBluetoothDevice;
+        }else
+            return null;
+    }
+
+    BluetoothGatt getBluetoothGatt() {
+        return mBluetoothGatt;
+    }
+
     private void checkConnected() {
         if (mRetryConnectEnable && mRetryConnectCount > 0 && connectTimeoutMillis > 0) {
             mHandler.postDelayed(new Runnable() {

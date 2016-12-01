@@ -32,7 +32,7 @@ publish {
     userOrg = 'qindachang'
     groupId = 'com.qindachang'
     artifactId = 'BluetoothLELibrary'
-    publishVersion = '0.3.3'
+    publishVersion = '0.3.4'
     desc = 'Android Bluetooth LE library'
     website = 'https://github.com/qindachang/BluetoothLELibrary'
 }
