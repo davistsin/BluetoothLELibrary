@@ -23,6 +23,7 @@ import android.util.Log;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -69,7 +70,7 @@ class BleManager {
     private OnLeReadCharacteristicListener mOnLeReadCharacteristicListener;
 
     private RequestQueue mRequestQueue = new RequestQueue();
-    private Set<LeListener> mListenerList = new HashSet<>();
+    private Set<LeListener> mListenerList = new LinkedHashSet<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -719,9 +720,21 @@ class BleManager {
     }
 
     void cancelTag(Object tag) {
+        List<LeListener> leListenerList = new ArrayList<>();
         for (LeListener leListener : mListenerList) {
             if (leListener.getTag() == tag) {
-                mListenerList.remove(leListener);
+                leListenerList.add(leListener);
+            }
+        }
+        cancelTagList(leListenerList);
+    }
+
+    private void cancelTagList(List<LeListener> list) {
+        if (list.size() > 0 && !list.isEmpty()) {
+            mListenerList.remove(list.get(0));
+            if (list.size() > 0 && !list.isEmpty()) {
+                list.remove(0);
+                cancelTagList(list);
             }
         }
     }
