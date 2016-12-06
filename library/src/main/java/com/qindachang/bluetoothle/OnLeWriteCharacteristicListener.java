@@ -3,8 +3,8 @@ package com.qindachang.bluetoothle;
 import android.bluetooth.BluetoothGattCharacteristic;
 
 
-public interface OnLeWriteCharacteristicListener {
-    void onSuccess(BluetoothGattCharacteristic characteristic);
+public abstract class OnLeWriteCharacteristicListener extends LeListener{
+    public abstract void onSuccess(BluetoothGattCharacteristic characteristic);
 
-    void onFailed(String msg, int status);
+    public abstract void onFailed(String msg, int status);
 }

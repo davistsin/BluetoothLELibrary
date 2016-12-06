@@ -8,12 +8,12 @@ import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
 
-public interface OnLeScanListener {
-    void onScanResult(BluetoothDevice bluetoothDevice,int rssi,ScanRecord scanRecord);
+public abstract class OnLeScanListener extends LeListener {
+    public abstract void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord);
 
-    void onBatchScanResults(List<ScanResult> results);
+    public abstract void onBatchScanResults(List<ScanResult> results);
 
-    void onScanCompleted();
+    public abstract void onScanCompleted();
 
-    void onScanFailed(int code);
+    public abstract void onScanFailed(int code);
 }

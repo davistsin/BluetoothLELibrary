@@ -3,16 +3,16 @@ package com.qindachang.bluetoothle;
 import android.bluetooth.BluetoothGatt;
 
 
-public interface OnLeConnectListener extends LeListener {
+public abstract class OnLeConnectListener extends LeListener {
 
-    void onDeviceConnecting();
+    public abstract void onDeviceConnecting();
 
-    void onDeviceConnected();
+    public abstract void onDeviceConnected();
 
-    void onDeviceDisconnected();
+    public abstract void onDeviceDisconnected();
 
-    void onServicesDiscovered(BluetoothGatt gatt);
+    public abstract void onServicesDiscovered(BluetoothGatt gatt);
 
-    void onDeviceConnectFail();
+    public abstract void onDeviceConnectFail();
 
 }

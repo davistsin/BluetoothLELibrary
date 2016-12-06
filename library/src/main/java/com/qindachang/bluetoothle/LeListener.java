@@ -7,6 +7,14 @@ package com.qindachang.bluetoothle;
  * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
  */
 
-interface LeListener {
+abstract class LeListener {
+    private Object mTag;
 
+    public Object getTag() {
+        return mTag;
+    }
+
+    public void setTag(Object tag) {
+        mTag = tag;
+    }
 }
