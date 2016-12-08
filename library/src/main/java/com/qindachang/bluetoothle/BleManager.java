@@ -392,8 +392,7 @@ class BleManager {
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
-        characteristic.setValue(bytes);
-        mRequestQueue.addRequest(Request.newWriteRequest(characteristic));
+        mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
     }
 
     private boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
@@ -763,7 +762,9 @@ class BleManager {
             Request request = mRequestBlockingQueue.peek();
             switch (request.type) {
                 case WRITE:
-                    writeCharacteristic(request.getCharacteristic());
+                    BluetoothGattCharacteristic characteristic = request.getCharacteristic();
+                    characteristic.setValue(request.getBytes());
+                    writeCharacteristic(characteristic);
                     break;
                 case READ:
                     readCharacteristic(request.getCharacteristic());

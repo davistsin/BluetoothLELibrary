@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 class Request {
 
+    private byte[] mBytes;
 
     enum Type {
         WRITE,
@@ -21,6 +22,12 @@ class Request {
         this.characteristic = characteristic;
     }
 
+    private Request(final Type type, final BluetoothGattCharacteristic characteristic, byte[] bytes) {
+        this.type = type;
+        this.characteristic = characteristic;
+        this.mBytes = bytes;
+    }
+
     private Request(final Type type, final BluetoothGattCharacteristic characteristic, boolean enable) {
         this.type = type;
         this.characteristic = characteristic;
@@ -31,8 +38,8 @@ class Request {
         return new Request(Type.READ, characteristic);
     }
 
-    public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic) {
-        return new Request(Type.WRITE, characteristic);
+    public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, byte[] bytes) {
+        return new Request(Type.WRITE, characteristic, bytes);
     }
 
     public static Request newEnableNotificationsRequest(final boolean enable, final BluetoothGattCharacteristic characteristic) {
@@ -48,6 +55,9 @@ class Request {
         return characteristic;
     }
 
+    public byte[] getBytes() {
+        return mBytes;
+    }
 
     public boolean isEnable() {
         return enable;
