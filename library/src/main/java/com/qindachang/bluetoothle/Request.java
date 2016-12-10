@@ -46,8 +46,8 @@ class Request {
         return new Request(Type.ENABLE_NOTIFICATIONS, characteristic, enable);
     }
 
-    public static Request newEnableIndicationsRequest(final BluetoothGattCharacteristic characteristic) {
-        return new Request(Type.ENABLE_INDICATIONS, characteristic);
+    public static Request newEnableIndicationsRequest(final boolean enable, final BluetoothGattCharacteristic characteristic) {
+        return new Request(Type.ENABLE_INDICATIONS, characteristic, enable);
     }
 
 

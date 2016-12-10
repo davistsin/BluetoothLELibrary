@@ -222,6 +222,36 @@ public class BluetoothLe {
         mBleManager.addLeListenerList(onLeNotificationListener);
     }
 
+    public BluetoothLe enableIndication(boolean enable,String serviceUUID,String characteristicUUID) {
+        enableIndication(enable, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
+        return this;
+    }
+
+    public BluetoothLe enableIndication(boolean enable, UUID serviceUUID, UUID characteristicUUID) {
+        enableIndication(enable, serviceUUID, new UUID[]{characteristicUUID});
+        return this;
+    }
+
+    public BluetoothLe enableIndication(boolean enable, String serviceUUID, String[] characteristicUUIDs) {
+        int length = characteristicUUIDs.length;
+        UUID[] uuids = new UUID[length];
+        for (int i=0;i<length;i++) {
+            uuids[i] = UUID.fromString(characteristicUUIDs[i]);
+        }
+        enableIndication(enable, UUID.fromString(serviceUUID), uuids);
+        return this;
+    }
+
+    public BluetoothLe enableIndication(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        mBleManager.enableIndicationQueue(enable, serviceUUID, characteristicUUIDs);
+        return this;
+    }
+
+    public void setOnIndicationListener(@NonNull Object tag, OnLeIndicationListener onLeIndicationListener) {
+        onLeIndicationListener.setTag(tag);
+        mBleManager.addLeListenerList(onLeIndicationListener);
+    }
+
     public void readCharacteristic(String serviceUUID, String characteristicUUID) {
         mBleManager.readCharacteristicQueue(UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
     }

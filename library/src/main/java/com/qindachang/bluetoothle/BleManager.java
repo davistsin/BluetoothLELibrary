@@ -22,7 +22,6 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -161,6 +160,9 @@ class BleManager {
                     REQUEST_PERMISSION_REQ_CODE);
             return;
         }
+
+        stopScan();
+
         BluetoothLeScannerCompat scannerCompat = BluetoothLeScannerCompat.getScanner();
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -363,12 +365,16 @@ class BleManager {
         if (gatt == null || characteristic == null)
             return false;
         final int properties = characteristic.getProperties();
-        if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0)
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0) {
+            Log.e(TAG, "uuid:" + characteristic.getUuid() + ", does not support notification");
             return false;
+        }
         gatt.setCharacteristicNotification(characteristic, enable);
+        Log.d(TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
         final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
         if (descriptor != null) {
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            Log.d(TAG, "writeDescriptor(notification), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
             return gatt.writeDescriptor(descriptor);
         }
         return false;
@@ -383,6 +389,34 @@ class BleManager {
 
     void setOnLeNotificationListener(OnLeNotificationListener onLeNotificationListener) {
         this.mOnLeNotificationListener = onLeNotificationListener;
+    }
+
+    private boolean enableIndication(boolean enable, BluetoothGattCharacteristic characteristic) {
+        final BluetoothGatt gatt = mBluetoothGatt;
+        if (gatt == null || characteristic == null) {
+            return false;
+        }
+        final int properties = characteristic.getProperties();
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) == 0) {
+            Log.e(TAG, "uuid:" + characteristic.getUuid() + ", does not support indication");
+            return false;
+        }
+        gatt.setCharacteristicNotification(characteristic, enable);
+        Log.d(TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
+        final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+        if (descriptor != null) {
+            descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+            Log.d(TAG, "writeDescriptor(indication), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+            return gatt.writeDescriptor(descriptor);
+        }
+        return false;
+    }
+
+    void enableIndicationQueue(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
+        for (UUID characteristicUUID : characteristicUUIDs) {
+            mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+        }
     }
 
     void writeCharacteristicQueue(byte[] bytes, UUID serviceUUID, UUID characteristicUUID) {
@@ -666,13 +700,24 @@ class BleManager {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    for (LeListener leListener : mListenerList) {
-                        if (leListener instanceof OnLeNotificationListener) {
-                            ((OnLeNotificationListener) leListener).onSuccess(characteristic);
+                    final BluetoothGattDescriptor cccd = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+                    final boolean notifications = cccd == null || cccd.getValue() == null || cccd.getValue().length != 2 || cccd.getValue()[0] == 0x01;
+
+                    if (notifications) {
+                        for (LeListener leListener : mListenerList) {
+                            if (leListener instanceof OnLeNotificationListener) {
+                                ((OnLeNotificationListener) leListener).onSuccess(characteristic);
+                            }
                         }
-                    }
-                    if (mOnLeNotificationListener != null) {
-                        mOnLeNotificationListener.onSuccess(characteristic);
+                        if (mOnLeNotificationListener != null) {
+                            mOnLeNotificationListener.onSuccess(characteristic);
+                        }
+                    } else {
+                        for (LeListener leListener : mListenerList) {
+                            if (leListener instanceof OnLeIndicationListener) {
+                                ((OnLeIndicationListener) leListener).onSuccess(characteristic);
+                            }
+                        }
                     }
                 }
             });
@@ -773,6 +818,7 @@ class BleManager {
                     enableNotification(request.isEnable(), request.getCharacteristic());
                     break;
                 case ENABLE_INDICATIONS:
+                    enableIndication(request.isEnable(), request.getCharacteristic());
                     break;
             }
         }
@@ -789,6 +835,5 @@ class BleManager {
         }
 
     }
-
 
 }
