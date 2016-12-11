@@ -3,11 +3,9 @@ package com.qindachang.bluetoothlelibrary;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.qindachang.bluetoothle.BluetoothLe;
@@ -23,7 +21,7 @@ import java.util.List;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -36,8 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private static final byte[] OPEN_HEART_RATE_NOTIFY = {0x01, 0x01};
     private static final byte[] OPEN_STEP_NOTIFY = {0x06, 0x01};
 
-    private Button btn_scan, btn_stop_scan, btn_connect, btn_disconnect, btn_clear, btn_open_notification,
-            btn_write_hr, btn_write_step, btn_read, btn_clear_all, btn_close_all_notify, btn_clear_cache;
     private TextView tv_text;
 
     private BluetoothLe mBluetoothLe;
@@ -49,126 +45,51 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btn_scan = (Button) findViewById(R.id.btn_scan);
-        btn_stop_scan = (Button) findViewById(R.id.btn_stop_scan);
         tv_text = (TextView) findViewById(R.id.tv_text);
-        btn_connect = (Button) findViewById(R.id.btn_connect);
-        btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
-        btn_clear = (Button) findViewById(R.id.btn_clear);
-        btn_open_notification = (Button) findViewById(R.id.btn_open_notification);
-        btn_write_hr = (Button) findViewById(R.id.btn_write_hr);
-        btn_write_step = (Button) findViewById(R.id.btn_write_step);
-        btn_read = (Button) findViewById(R.id.btn_read);
-        btn_clear_all = (Button) findViewById(R.id.btn_clear_all);
-        btn_close_all_notify = (Button) findViewById(R.id.btn_close_all_notify);
-        btn_clear_cache = (Button) findViewById(R.id.btn_clear_cache);
 
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
         mBluetoothLe.init(this);//必须调用init()初始化
 
         mStringBuilder = new StringBuilder();
 
-
         if (!mBluetoothLe.isBluetoothOpen()) {
             mBluetoothLe.enableBluetooth(this);
         }
 
-        btn_scan.setOnClickListener(new View.OnClickListener() {
+        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
             @Override
-            public void onClick(View v) {
-                scan();
+            public void onDeviceConnecting() {
+                mStringBuilder.append("连接中...\n");
+                tv_text.setText(mStringBuilder.toString());
             }
-        });
 
-        btn_stop_scan.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                stopScan();
+            public void onDeviceConnected() {
+                mStringBuilder.append("蓝牙已连接\n");
+                tv_text.setText(mStringBuilder.toString());
             }
-        });
-
-        btn_connect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                connect();
-            }
-        });
-
-        btn_disconnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disconnect();
-            }
-        });
-
-        btn_clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mStringBuilder.delete(0, mStringBuilder.length());
-                tv_text.setText("");
-            }
-        });
-
-        btn_open_notification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAllNotification();
-            }
-        });
-
-        btn_write_hr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                for (int i = 0; i < 50; i++) {
-                    sendMsg(OPEN_HEART_RATE_NOTIFY);
-                }
-            }
-        });
-        btn_write_step.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMsg(OPEN_STEP_NOTIFY);
-            }
-        });
 
 
-        btn_read.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                for (int i = 0; i < 20; i++) {
-                    read();
-                }
+            public void onDeviceDisconnected() {
+                mStringBuilder.append("蓝牙已断开！\n");
+                tv_text.setText(mStringBuilder.toString());
             }
-        });
-        btn_clear_all.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View view) {
-                mBluetoothLe.clearQueue();
+            public void onServicesDiscovered(BluetoothGatt gatt) {
+                mStringBuilder.append("发现服务啦\n");
+                tv_text.setText(mStringBuilder.toString());
             }
-        });
 
-        btn_close_all_notify.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                mBluetoothLe.enableNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
-            }
-        });
-
-        btn_clear_cache.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mBluetoothLe.clearDeviceCache()) {
-                    mStringBuilder.append("清理蓝牙缓存：成功");
-
-                } else {
-                    mStringBuilder.append("清理蓝牙缓存：失败！");
-                }
-                mStringBuilder.append("\n");
+            public void onDeviceConnectFail() {
+                mStringBuilder.append("连接失败~~\n");
                 tv_text.setText(mStringBuilder.toString());
             }
         });
 
-        mBluetoothLe.setOnReadCharacteristicListener(new OnLeReadCharacteristicListener() {
+        mBluetoothLe.setOnReadCharacteristicListener(TAG, new OnLeReadCharacteristicListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 mStringBuilder.append("读取到：").append(Arrays.toString(characteristic.getValue()));
@@ -183,11 +104,11 @@ public class MainActivity extends AppCompatActivity {
                 tv_text.setText(mStringBuilder.toString());
             }
         });
-        mBluetoothLe.setOnWriteCharacteristicListener(new OnLeWriteCharacteristicListener() {
 
+
+        mBluetoothLe.setOnWriteCharacteristicListener(TAG, new OnLeWriteCharacteristicListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
-                Log.d("debug", "发送了数据:" + Arrays.toString(characteristic.getValue()));
                 mStringBuilder.append("发送了：").append(Arrays.toString(characteristic.getValue()));
                 mStringBuilder.append("\n");
                 tv_text.setText(mStringBuilder.toString());
@@ -195,79 +116,90 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailed(String msg, int status) {
-
-            }
-        });
-
-        mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
-            @Override
-            public void onDeviceConnecting() {
-                mStringBuilder.append("连接中1");
-                mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-            @Override
-            public void onDeviceConnected() {
-                mStringBuilder.append("已连接1");
-                mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-            @Override
-            public void onDeviceDisconnected() {
-                mStringBuilder.append("断开连接1");
-                mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-            @Override
-            public void onServicesDiscovered(BluetoothGatt gatt) {
-                mStringBuilder.append("发现服务1");
-                mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-            @Override
-            public void onDeviceConnectFail() {
-                mStringBuilder.append("连接失败1");
+                mStringBuilder.append("写入数据错误：").append(msg);
                 mStringBuilder.append("\n");
                 tv_text.setText(mStringBuilder.toString());
             }
         });
 
-
-        mBluetoothLe.setOnWriteCharacteristicListener(TAG, new OnLeWriteCharacteristicListener() {
+        mBluetoothLe.setOnNotificationListener(TAG, new OnLeNotificationListener() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
-
-            }
-
-            @Override
-            public void onFailed(String msg, int status) {
-
+                mStringBuilder.append("收到通知：")
+                        .append(Arrays.toString(characteristic.getValue()))
+                        .append("\n");
+                tv_text.setText(mStringBuilder.toString());
             }
         });
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothLe.destroy();
         mBluetoothLe.destroy(TAG);//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
         mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
-        mBluetoothLe.cancelAllTag();
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.btn_scan:
+                scan();
+                break;
+            case R.id.btn_stop_scan:
+                stopScan();
+                break;
+            case R.id.btn_connect:
+                connect();
+                break;
+            case R.id.btn_disconnect:
+                disconnect();
+                break;
+            case R.id.btn_clear_text:
+                mStringBuilder.delete(0, mStringBuilder.length());
+                tv_text.setText("");
+                break;
+            case R.id.btn_read:
+                read();
+                break;
+            case R.id.btn_write_hr:
+                //试一下连发50条
+                for (int i = 0; i < 50; i++) {
+                    sendMsg(OPEN_HEART_RATE_NOTIFY);
+                }
+                break;
+            case R.id.btn_write_step:
+                sendMsg(OPEN_STEP_NOTIFY);
+                break;
+            case R.id.btn_open_notification:
+                openAllNotification();
+                break;
+            case R.id.btn_close_notification:
+                closeAllNotification();
+                break;
+            case R.id.btn_clear_cache:
+                clearCache();
+                break;
+            case R.id.btn_clear_queue:
+                mBluetoothLe.clearQueue();
+                break;
+        }
     }
 
     //扫描兼容了4.3/5.0/6.0的安卓版本
     //在6.0版本中，蓝牙扫描需要地理位置权限，否则会出现没有扫描结果的情况，扫描程序中已自带权限申请
     private void scan() {
-        mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒
+        //先判断蓝牙是否正在扫描，如果是则先停止扫描，否则会报错
+        if (mBluetoothLe.getScanning()) {
+            mBluetoothLe.stopScan();
+        }
+        mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒,默认10秒
+//                .setScanWithDeviceAddress("00:20:ff:34:aa:b3")
 //                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
-                // .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
+//                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
-                .startScan(TAG, this, new OnLeScanListener() {
+                .startScan(this, new OnLeScanListener() {
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
                         mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
@@ -304,87 +236,54 @@ public class MainActivity extends AppCompatActivity {
     //有些手机的连接过程比较长，经测试，小米手机连接所花时间最多，有时会在15s左右
     //发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
     private void connect() {
-        mBluetoothLe.setRetryConnectEnable(true)//设置尝试重新连接
-                .setRetryConnectCount(3)//重试连接次数
-                .setConnectTimeOut(5000)//连接超时，单位毫秒
-                .setServiceDiscoverTimeOut(5000)//发现服务超时，单位毫秒
-                .startConnect(false, mBluetoothDevice, new OnLeConnectListener() {
-
-                    @Override
-                    public void onDeviceConnecting() {
-                        mStringBuilder.append("连接中...\n");
-                        tv_text.setText(mStringBuilder.toString());
-                    }
-
-                    @Override
-                    public void onDeviceConnected() {
-                        mStringBuilder.append("成功连接！\n");
-                        tv_text.setText(mStringBuilder.toString());
-                    }
-
-
-                    @Override
-                    public void onDeviceDisconnected() {
-                        mStringBuilder.append("断开连接！\n");
-                        tv_text.setText(mStringBuilder.toString());
-                    }
-
-                    @Override
-                    public void onServicesDiscovered(BluetoothGatt gatt) {
-                        mStringBuilder.append("发现服务啦\n");
-                        tv_text.setText(mStringBuilder.toString());
-                    }
-
-                    @Override
-                    public void onDeviceConnectFail() {
-                        mStringBuilder.append("连接失败~~\n");
-                        tv_text.setText(mStringBuilder.toString());
-                    }
-                });
+        mBluetoothLe.setRetryConnectEnable(false)//设置尝试重新连接
+//                .setRetryConnectCount(3)//重试连接次数
+//                .setConnectTimeOut(5000)//连接超时，单位毫秒
+//                .setServiceDiscoverTimeOut(5000)//发现服务超时，单位毫秒
+                .startConnect(false, mBluetoothDevice);
     }
 
     private void disconnect() {
         mBluetoothLe.disconnect();
-        mBluetoothLe.close();
-    }
-
-    private void openNotification() {
-        mBluetoothLe.enableNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID)
-                .setOnNotificationListener(new OnLeNotificationListener() {
-                    @Override
-                    public void onSuccess(BluetoothGattCharacteristic characteristic) {
-
-                    }
-                });
     }
 
     private void openAllNotification() {
-        mBluetoothLe.enableNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
-        mBluetoothLe.setOnNotificationListener(new OnLeNotificationListener() {
-            @Override
-            public void onSuccess(BluetoothGattCharacteristic characteristic) {
-                Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
-                mStringBuilder.append("收到通知：" + Arrays.toString(characteristic.getValue()) + "\n");
-                tv_text.setText(mStringBuilder.toString());
-            }
-
-        });
-
-
+        if (mBluetoothLe.getServicesDiscovered()) {
+            mBluetoothLe.enableNotification(true, SERVICE_UUID,
+                    new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+        }
     }
 
-
-    private void closeNotification() {
-        mBluetoothLe.enableNotification(false, SERVICE_UUID, HEART_NOTIFICATION_UUID);
+    private void closeAllNotification() {
+        if (mBluetoothLe.getServicesDiscovered()) {
+            mBluetoothLe.enableNotification(false, SERVICE_UUID,
+                    new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+        }
     }
 
     private void sendMsg(byte[] bytes) {
-        mBluetoothLe.writeDataToCharacteristic(bytes, SERVICE_UUID, WRITE_UUID);
+        if (mBluetoothLe.getServicesDiscovered()) {
+            mBluetoothLe.writeDataToCharacteristic(bytes, SERVICE_UUID, WRITE_UUID);
+        }
     }
 
     private void read() {
-        mBluetoothLe.readCharacteristic(SERVICE_UUID, READ_UUID);
-
+        if (mBluetoothLe.getServicesDiscovered()) {
+            mBluetoothLe.readCharacteristic(SERVICE_UUID, READ_UUID);
+        }
     }
 
+    private void clearCache() {
+        if (!mBluetoothLe.getConnected()) {
+            return;
+        }
+        if (mBluetoothLe.clearDeviceCache()) {
+            mStringBuilder.append("清理蓝牙缓存：成功");
+
+        } else {
+            mStringBuilder.append("清理蓝牙缓存：失败！");
+        }
+        mStringBuilder.append("\n");
+        tv_text.setText(mStringBuilder.toString());
+    }
 }
