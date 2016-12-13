@@ -35,6 +35,18 @@ public class BluetoothLe {
         }
     }
 
+    public void init(Context context, BluetoothConfig config) {
+        if (mBleManager == null) {
+            mBleManager = new BleManager(context.getApplicationContext(), config);
+        } else {
+            mBleManager.setConfig(config);
+        }
+    }
+
+    public void changeConfig(BluetoothConfig config) {
+        mBleManager.setConfig(config);
+    }
+
     public boolean isBluetoothOpen() {
         return mBleManager.isBluetoothOpen();
     }
@@ -222,7 +234,7 @@ public class BluetoothLe {
         mBleManager.addLeListenerList(onLeNotificationListener);
     }
 
-    public BluetoothLe enableIndication(boolean enable,String serviceUUID,String characteristicUUID) {
+    public BluetoothLe enableIndication(boolean enable, String serviceUUID, String characteristicUUID) {
         enableIndication(enable, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID));
         return this;
     }
@@ -235,7 +247,7 @@ public class BluetoothLe {
     public BluetoothLe enableIndication(boolean enable, String serviceUUID, String[] characteristicUUIDs) {
         int length = characteristicUUIDs.length;
         UUID[] uuids = new UUID[length];
-        for (int i=0;i<length;i++) {
+        for (int i = 0; i < length; i++) {
             uuids[i] = UUID.fromString(characteristicUUIDs[i]);
         }
         enableIndication(enable, UUID.fromString(serviceUUID), uuids);
@@ -302,6 +314,12 @@ public class BluetoothLe {
     public void setOnWriteCharacteristicListener(@NonNull Object tag, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         onLeWriteCharacteristicListener.setTag(tag);
         mBleManager.addLeListenerList(onLeWriteCharacteristicListener);
+    }
+
+    public void setOnRssiListener(@NonNull Object tag, OnLeRssiListener onLeRssiListener) {
+        onLeRssiListener.setTag(tag);
+        mBleManager.addLeListenerList(onLeRssiListener);
+        mBleManager.readRssi();
     }
 
     public void close() {

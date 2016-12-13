@@ -55,6 +55,9 @@ class BleManager {
     private int connectTimeoutMillis;
     private int serviceTimeoutMillis;
 
+    private int queueDelayTime;
+    private boolean enableQueueDelay;
+
     private boolean mAutoConnect;
     private BluetoothDevice mBluetoothDevice;
 
@@ -75,6 +78,17 @@ class BleManager {
 
     BleManager(Context context) {
         mContext = context;
+    }
+
+    BleManager(Context context,BluetoothConfig config) {
+        mContext = context;
+        queueDelayTime = config.wtfQueueDelayTime();
+        enableQueueDelay = config.wtfEnableQueueDelay();
+    }
+
+    void setConfig(BluetoothConfig config) {
+        queueDelayTime = config.wtfQueueDelayTime();
+        enableQueueDelay = config.wtfEnableQueueDelay();
     }
 
     boolean isBluetoothOpen() {
@@ -465,6 +479,10 @@ class BleManager {
         mOnLeReadCharacteristicListener = onLeReadCharacteristicListener;
     }
 
+    boolean readRssi() {
+        return mBluetoothGatt.readRemoteRssi();
+    }
+
     void disconnect() {
         if (mConnected && mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
@@ -741,8 +759,31 @@ class BleManager {
         }
 
         @Override
-        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+        public void onReadRemoteRssi(BluetoothGatt gatt, final int rssi, int status) {
             super.onReadRemoteRssi(gatt, rssi, status);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (LeListener leListener : mListenerList) {
+                            if (leListener instanceof OnLeRssiListener) {
+                                ((OnLeRssiListener) leListener).onSuccess(rssi, Utils.getDistance(rssi));
+                            }
+                        }
+                    }
+                });
+            } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (LeListener leListener : mListenerList) {
+                            if (leListener instanceof OnLeRssiListener) {
+                                ((OnLeRssiListener) leListener).onFailure();
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         @Override
@@ -824,6 +865,19 @@ class BleManager {
         }
 
         void next() {
+            if (enableQueueDelay) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        runQueue();
+                    }
+                }, queueDelayTime);
+            } else {
+                runQueue();
+            }
+        }
+
+        void runQueue() {
             mRequestBlockingQueue.poll();
             if (mRequestBlockingQueue != null && mRequestBlockingQueue.size() > 0) {
                 startExecutor();
