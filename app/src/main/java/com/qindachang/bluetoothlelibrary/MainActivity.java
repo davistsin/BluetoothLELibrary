@@ -8,10 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.qindachang.bluetoothle.BluetoothConfig;
 import com.qindachang.bluetoothle.BluetoothLe;
 import com.qindachang.bluetoothle.OnLeConnectListener;
 import com.qindachang.bluetoothle.OnLeNotificationListener;
 import com.qindachang.bluetoothle.OnLeReadCharacteristicListener;
+import com.qindachang.bluetoothle.OnLeRssiListener;
 import com.qindachang.bluetoothle.OnLeScanListener;
 import com.qindachang.bluetoothle.OnLeWriteCharacteristicListener;
 
@@ -55,6 +57,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!mBluetoothLe.isBluetoothOpen()) {
             mBluetoothLe.enableBluetooth(this);
         }
+
+        BluetoothConfig config = new BluetoothConfig.Builder()
+                .enableQueueInterval(false)
+                .build();
+        mBluetoothLe.changeConfig(config);
 
         mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
             @Override
@@ -129,6 +136,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .append(Arrays.toString(characteristic.getValue()))
                         .append("\n");
                 tv_text.setText(mStringBuilder.toString());
+            }
+        });
+
+        mBluetoothLe.setOnRssiListener(TAG, new OnLeRssiListener() {
+            @Override
+            public void onSuccess(int rssi, int cm) {
+
             }
         });
     }

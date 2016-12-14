@@ -58,6 +58,8 @@ class BleManager {
     private int queueDelayTime;
     private boolean enableQueueDelay;
 
+    private boolean isReadRssi;
+
     private boolean mAutoConnect;
     private BluetoothDevice mBluetoothDevice;
 
@@ -479,8 +481,12 @@ class BleManager {
         mOnLeReadCharacteristicListener = onLeReadCharacteristicListener;
     }
 
-    boolean readRssi() {
-        return mBluetoothGatt.readRemoteRssi();
+    void readRssi() {
+        if (mConnected) {
+            mBluetoothGatt.readRemoteRssi();
+        } else {
+            isReadRssi = true;
+        }
     }
 
     void disconnect() {
@@ -549,6 +555,10 @@ class BleManager {
                         }
                     }
                 }, 600);
+
+                if (isReadRssi) {
+                    mBluetoothGatt.readRemoteRssi();
+                }
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "device disconnect.");
@@ -768,17 +778,6 @@ class BleManager {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeRssiListener) {
                                 ((OnLeRssiListener) leListener).onSuccess(rssi, Utils.getDistance(rssi));
-                            }
-                        }
-                    }
-                });
-            } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (LeListener leListener : mListenerList) {
-                            if (leListener instanceof OnLeRssiListener) {
-                                ((OnLeRssiListener) leListener).onFailure();
                             }
                         }
                     }

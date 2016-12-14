@@ -9,6 +9,4 @@ package com.qindachang.bluetoothle;
 
 public abstract class OnLeRssiListener extends LeListener {
     public abstract void onSuccess(int rssi, int cm);
-
-    public abstract void onFailure();
 }

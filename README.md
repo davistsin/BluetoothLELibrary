@@ -11,7 +11,8 @@
 5. 支持同时**开启多个通知**。
 6. 可以连续操作发送数据、读取特征、开启通知，即使你在for循环中写也没问题，**自带队列**。
 6. 扫描操作支持-> 设置扫描时长、根据设备名称扫描、根据硬件地址扫描、根据服务UUID扫描、连接成功后自动关闭扫描。
-7.
+7. 队列定时设置，满足因公司需求蓝牙时间间隔。
+8. 设备信号强度、距离计算回调，可用于防丢器产品。
 
 ###注意点：
 1. Android 6.0扫描蓝牙需要地理位置权限。
@@ -65,6 +66,31 @@
 **二、初始化**
 
 	mBluetoothLe.init(this);//必须调用init()初始化
+
+或者使用配置方式进行初始化。
+
+新增配置：发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据
+
+在Application的onCreate()方法中参照以下方式配置：
+
+    public class BaseApplication extends Application {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            BluetoothConfig config = new BluetoothConfig.Builder()
+                    .enableQueueInterval(true)//开启队列定时
+                    .setQueueIntervalTime(150)//设置定时时长（才会发下一条），单位ms
+                    .build();
+            BluetoothLe.getDefault().init(this, config);
+        }
+    }
+
+修改配置：
+
+    BluetoothConfig config = new BluetoothConfig.Builder()
+                    .enableQueueInterval(false)
+                    .build();
+            mBluetoothLe.changeConfig(config);
 
 **三、扫描**
 
@@ -275,21 +301,26 @@
 
 **九、蓝牙信号强度、距离**
 
+    mBluetoothLe.setOnRssiListener(TAG, new OnLeRssiListener() {
+        @Override
+        public void onSuccess(int rssi, int cm) {
 
+        }
+    });
 
-**九、清理蓝牙缓存**
+**十、清理蓝牙缓存**
 
 请你在连接上蓝牙后，再执行这步操作
 
     mBluetoothLe.clearDeviceCache();
 
-**十、关闭GATT**
+**十一、关闭GATT**
 
 在你退出应用的时候使用
 
     mBluetoothLe.close();
 
-**十一、取消队列**
+**十二、取消队列**
 
 假设当你在for循环中发送100条数据，想要在中途取消余下的发送
 
@@ -314,8 +345,7 @@
     mBluetoothLe.cancelAllTag();
 
 ##仍在补充
-1. 蓝牙设备信号强度监听，并提供距离计算回调，可用于防丢器
-2. 发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据
+1. (欢迎提出)
 
 ##了解更多
 
