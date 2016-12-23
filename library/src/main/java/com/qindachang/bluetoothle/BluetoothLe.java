@@ -316,9 +316,14 @@ public class BluetoothLe {
         mBleManager.addLeListenerList(onLeWriteCharacteristicListener);
     }
 
-    public void setOnRssiListener(@NonNull Object tag, OnLeRssiListener onLeRssiListener) {
-        onLeRssiListener.setTag(tag);
-        mBleManager.addLeListenerList(onLeRssiListener);
+    public BluetoothLe setReadRssiInterval(int millisecond) {
+        mBleManager.setReadRssiIntervalMillisecond(millisecond);
+        return this;
+    }
+
+    public void setOnReadRssiListener(@NonNull Object tag, OnLeReadRssiListener onLeReadRssiListener) {
+        onLeReadRssiListener.setTag(tag);
+        mBleManager.addLeListenerList(onLeReadRssiListener);
         mBleManager.readRssi();
     }
 

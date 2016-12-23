@@ -13,7 +13,7 @@ import com.qindachang.bluetoothle.BluetoothLe;
 import com.qindachang.bluetoothle.OnLeConnectListener;
 import com.qindachang.bluetoothle.OnLeNotificationListener;
 import com.qindachang.bluetoothle.OnLeReadCharacteristicListener;
-import com.qindachang.bluetoothle.OnLeRssiListener;
+import com.qindachang.bluetoothle.OnLeReadRssiListener;
 import com.qindachang.bluetoothle.OnLeScanListener;
 import com.qindachang.bluetoothle.OnLeWriteCharacteristicListener;
 
@@ -139,12 +139,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mBluetoothLe.setOnRssiListener(TAG, new OnLeRssiListener() {
-            @Override
-            public void onSuccess(int rssi, int cm) {
+        mBluetoothLe.setReadRssiInterval(2000)
+                .setOnReadRssiListener(TAG, new OnLeReadRssiListener() {
+                    @Override
+                    public void onSuccess(int rssi, int cm) {
 
-            }
-        });
+                    }
+                });
     }
 
     @Override

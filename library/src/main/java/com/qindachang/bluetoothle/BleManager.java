@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
@@ -75,6 +77,10 @@ class BleManager {
 
     private RequestQueue mRequestQueue = new RequestQueue();
     private Set<LeListener> mListenerList = new LinkedHashSet<>();
+
+    private int readRssiIntervalMillisecond = 1000;
+    private Timer mTimer;
+    private TimerTask mTimerTask;
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -483,10 +489,40 @@ class BleManager {
 
     void readRssi() {
         if (mConnected) {
-            mBluetoothGatt.readRemoteRssi();
+            readRssiTimerTask();
         } else {
             isReadRssi = true;
         }
+    }
+
+    void setReadRssiIntervalMillisecond(int millisecond) {
+        readRssiIntervalMillisecond = millisecond;
+    }
+
+    private void cancelReadRssiTimerTask() {
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
+        if (mTimerTask != null) {
+            mTimerTask.cancel();
+            mTimerTask = null;
+        }
+    }
+
+    private void readRssiTimerTask() {
+        mTimer = null;
+        mTimerTask = null;
+        mTimer= new Timer();
+        mTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (mBluetoothGatt != null) {
+                    mBluetoothGatt.readRemoteRssi();
+                }
+            }
+        };
+        mTimer.schedule(mTimerTask, 100, readRssiIntervalMillisecond);
     }
 
     void disconnect() {
@@ -557,7 +593,8 @@ class BleManager {
                 }, 600);
 
                 if (isReadRssi) {
-                    mBluetoothGatt.readRemoteRssi();
+                    cancelReadRssiTimerTask();
+                    readRssiTimerTask();
                 }
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -776,8 +813,8 @@ class BleManager {
                     @Override
                     public void run() {
                         for (LeListener leListener : mListenerList) {
-                            if (leListener instanceof OnLeRssiListener) {
-                                ((OnLeRssiListener) leListener).onSuccess(rssi, Utils.getDistance(rssi));
+                            if (leListener instanceof OnLeReadRssiListener) {
+                                ((OnLeReadRssiListener) leListener).onSuccess(rssi, Utils.getDistance(rssi));
                             }
                         }
                     }

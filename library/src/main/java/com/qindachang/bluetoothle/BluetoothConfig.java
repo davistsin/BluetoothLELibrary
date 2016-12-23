@@ -29,14 +29,14 @@ public final class BluetoothConfig {
         private int queueDelayTime;
         private boolean enableQueueDelay;
 
-        public Builder setQueueIntervalTime(int queueIntervalTime) {
-            this.queueDelayTime = queueIntervalTime;
+        public Builder setQueueIntervalTime(int millisecond) {
+            this.queueDelayTime = millisecond;
             this.enableQueueDelay = true;
             return this;
         }
 
-        public Builder enableQueueInterval(boolean enableIntervalDelay) {
-            this.enableQueueDelay = enableIntervalDelay;
+        public Builder enableQueueInterval(boolean enable) {
+            this.enableQueueDelay = enable;
             return this;
         }
 

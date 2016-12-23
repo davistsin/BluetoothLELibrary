@@ -29,7 +29,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.4.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.4.2'
 
 
 **权限：**
@@ -301,12 +301,13 @@
 
 **九、蓝牙信号强度、距离**
 
-    mBluetoothLe.setOnRssiListener(TAG, new OnLeRssiListener() {
-        @Override
-        public void onSuccess(int rssi, int cm) {
+    mBluetoothLe.setReadRssiInterval(2000)//设置读取信号强度间隔时间，单位毫秒
+            .setOnReadRssiListener(TAG, new OnLeReadRssiListener() {
+                @Override
+                public void onSuccess(int rssi, int cm) {
 
-        }
-    });
+                }
+            });
 
 **十、清理蓝牙缓存**
 
@@ -387,3 +388,7 @@
    增加:
    1. 发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据;
    2. 蓝牙设备信号强度监听，并提供距离计算回调，可用于防丢器
+
+8. [Version 0.4.2]
+
+   fix:蓝牙信号强度监听

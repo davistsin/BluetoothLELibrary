@@ -7,6 +7,6 @@ package com.qindachang.bluetoothle;
  * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
  */
 
-public abstract class OnLeRssiListener extends LeListener {
+public abstract class OnLeReadRssiListener extends LeListener {
     public abstract void onSuccess(int rssi, int cm);
 }
