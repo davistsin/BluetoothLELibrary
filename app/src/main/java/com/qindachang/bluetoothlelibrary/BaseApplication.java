@@ -18,7 +18,7 @@ public class BaseApplication extends Application {
         super.onCreate();
         BluetoothConfig config = new BluetoothConfig.Builder()
                 .enableQueueInterval(true)
-                .setQueueIntervalTime(150)
+                .setQueueIntervalTime(BluetoothConfig.AUTO)
                 .build();
         BluetoothLe.getDefault().init(this, config);
     }

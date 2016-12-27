@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,6 +21,9 @@ import com.qindachang.bluetoothle.OnLeWriteCharacteristicListener;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
@@ -36,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final byte[] OPEN_HEART_RATE_NOTIFY = {0x01, 0x01};
     private static final byte[] OPEN_STEP_NOTIFY = {0x06, 0x01};
 
-    private TextView tv_text;
+    @BindView(R.id.tv_text)
+    TextView mTvText;
 
     private BluetoothLe mBluetoothLe;
     private StringBuilder mStringBuilder;
@@ -47,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv_text = (TextView) findViewById(R.id.tv_text);
+        ButterKnife.bind(this);
 
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
         mBluetoothLe.init(this);//必须调用init()初始化
@@ -67,32 +72,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDeviceConnecting() {
                 mStringBuilder.append("连接中...\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onDeviceConnected() {
                 mStringBuilder.append("蓝牙已连接\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
 
             @Override
             public void onDeviceDisconnected() {
                 mStringBuilder.append("蓝牙已断开！\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onServicesDiscovered(BluetoothGatt gatt) {
                 mStringBuilder.append("发现服务啦\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onDeviceConnectFail() {
                 mStringBuilder.append("连接失败~~\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
         });
 
@@ -101,14 +106,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 mStringBuilder.append("读取到：").append(Arrays.toString(characteristic.getValue()));
                 mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onFailure(String info, int status) {
                 mStringBuilder.append("读取失败：").append(info);
                 mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
         });
 
@@ -118,14 +123,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 mStringBuilder.append("发送了：").append(Arrays.toString(characteristic.getValue()));
                 mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
 
             @Override
             public void onFailed(String msg, int status) {
                 mStringBuilder.append("写入数据错误：").append(msg);
                 mStringBuilder.append("\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
         });
 
@@ -135,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mStringBuilder.append("收到通知：")
                         .append(Arrays.toString(characteristic.getValue()))
                         .append("\n");
-                tv_text.setText(mStringBuilder.toString());
+                mTvText.setText(mStringBuilder.toString());
             }
         });
 
@@ -143,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setOnReadRssiListener(TAG, new OnLeReadRssiListener() {
                     @Override
                     public void onSuccess(int rssi, int cm) {
-
+                        Log.d("debug", "信号强度：" + rssi + "  距离：" + cm + "cm");
                     }
                 });
     }
@@ -155,10 +160,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
     }
 
-    @Override
+    @OnClick({R.id.btn_stop_scan, R.id.btn_disconnect, R.id.btn_clear_text, R.id.btn_write_hr, R.id.btn_write_step, R.id.btn_read, R.id.btn_connect, R.id.btn_scan, R.id.btn_open_notification, R.id.btn_clear_queue, R.id.btn_close_notification, R.id.btn_clear_cache})
     public void onClick(View view) {
-        int id = view.getId();
-        switch (id) {
+        switch (view.getId()) {
             case R.id.btn_scan:
                 scan();
                 break;
@@ -173,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_clear_text:
                 mStringBuilder.delete(0, mStringBuilder.length());
-                tv_text.setText("");
+                mTvText.setText("");
                 break;
             case R.id.btn_read:
                 read();
@@ -218,26 +222,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
                         mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
-                        tv_text.setText(mStringBuilder.toString());
+                        mTvText.setText(mStringBuilder.toString());
                         mBluetoothDevice = bluetoothDevice;
                     }
 
                     @Override
                     public void onBatchScanResults(List<ScanResult> results) {
                         mStringBuilder.append("批处理信息：" + results.toString() + "\n");
-                        tv_text.setText(mStringBuilder.toString());
+                        mTvText.setText(mStringBuilder.toString());
                     }
 
                     @Override
                     public void onScanCompleted() {
                         mStringBuilder.append("扫描结束\n");
-                        tv_text.setText(mStringBuilder.toString());
+                        mTvText.setText(mStringBuilder.toString());
                     }
 
                     @Override
                     public void onScanFailed(int code) {
                         mStringBuilder.append("扫描错误\n");
-                        tv_text.setText(mStringBuilder.toString());
+                        mTvText.setText(mStringBuilder.toString());
                     }
                 });
     }
@@ -245,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void stopScan() {
         mBluetoothLe.stopScan();
         mStringBuilder.append("停止扫描\n");
-        tv_text.setText(mStringBuilder.toString());
+        mTvText.setText(mStringBuilder.toString());
     }
 
     //有些手机的连接过程比较长，经测试，小米手机连接所花时间最多，有时会在15s左右
@@ -299,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mStringBuilder.append("清理蓝牙缓存：失败！");
         }
         mStringBuilder.append("\n");
-        tv_text.setText(mStringBuilder.toString());
+        mTvText.setText(mStringBuilder.toString());
     }
+
 }

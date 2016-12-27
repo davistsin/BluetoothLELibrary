@@ -1,5 +1,8 @@
 package com.qindachang.bluetoothle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created on 2016/12/13.
  *
@@ -15,6 +18,15 @@ public class Utils {
         power = Math.pow(10d, power);
         power = power * 100;
         return (int) power;
+    }
+
+    public static List<Integer> bytes2IntegerList(byte[] bytes) {
+        List<Integer> list = new ArrayList<>();
+        for (byte aByte : bytes) {
+            int v = aByte & 0xFF;
+            list.add(v);
+        }
+        return list;
     }
 
 }

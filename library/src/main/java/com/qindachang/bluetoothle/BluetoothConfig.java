@@ -9,6 +9,8 @@ package com.qindachang.bluetoothle;
 
 public final class BluetoothConfig {
 
+    public static final int AUTO = -1;
+
     private int queueDelayTime;
     private boolean enableQueueDelay;
 
@@ -39,6 +41,8 @@ public final class BluetoothConfig {
             this.enableQueueDelay = enable;
             return this;
         }
+
+
 
         public BluetoothConfig build() {
             return new BluetoothConfig(this);

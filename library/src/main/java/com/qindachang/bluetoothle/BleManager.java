@@ -22,6 +22,7 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +38,7 @@ import no.nordicsemi.android.support.v18.scanner.ScanFilter;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 
+import static android.bluetooth.BluetoothDevice.TRANSPORT_BREDR;
 import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
 
@@ -44,7 +46,9 @@ class BleManager {
 
     private static final String TAG = BleManager.class.getSimpleName();
 
+    private static final UUID SERVICE = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    private static final UUID PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID = UUID.fromString("00002A04-0000-1000-8000-00805f9b34fb");
 
     private int REQUEST_PERMISSION_REQ_CODE = 888;
 
@@ -56,6 +60,11 @@ class BleManager {
     private int mRetryConnectCount = 1;
     private int connectTimeoutMillis;
     private int serviceTimeoutMillis;
+
+    private double connIntervalMin;
+    private double connIntervalMax;
+    private int slaveLatency;
+    private int connSupervisionTimeout;
 
     private int queueDelayTime;
     private boolean enableQueueDelay;
@@ -88,7 +97,7 @@ class BleManager {
         mContext = context;
     }
 
-    BleManager(Context context,BluetoothConfig config) {
+    BleManager(Context context, BluetoothConfig config) {
         mContext = context;
         queueDelayTime = config.wtfQueueDelayTime();
         enableQueueDelay = config.wtfEnableQueueDelay();
@@ -105,28 +114,32 @@ class BleManager {
     }
 
     boolean enableBluetooth(Activity activity) {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            Log.e(TAG, "false. your device does not support bluetooth. ");
-            return false;
+        synchronized (BleManager.class) {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null) {
+                Log.e(TAG, "false. your device does not support bluetooth. ");
+                return false;
+            }
+            if (bluetoothAdapter.isEnabled()) {
+                Log.d(TAG, "false. your device has been turn on bluetooth.");
+                return false;
+            }
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            activity.startActivity(intent);
+            return true;
         }
-        if (bluetoothAdapter.isEnabled()) {
-            Log.d(TAG, "false. your device has been turn on bluetooth.");
-            return false;
-        }
-        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        activity.startActivity(intent);
-        return true;
     }
 
     boolean disableBluetooth() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter.isEnabled()) {
-            bluetoothAdapter.disable();
-            return true;
-        } else {
-            Log.d(TAG, "false. your device has been turn off Bluetooth.");
-            return false;
+        synchronized (BleManager.class) {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter.isEnabled()) {
+                bluetoothAdapter.disable();
+                return true;
+            } else {
+                Log.d(TAG, "false. your device has been turn off Bluetooth.");
+                return false;
+            }
         }
     }
 
@@ -143,22 +156,23 @@ class BleManager {
     }
 
     boolean clearDeviceCache() {
-        if (mBluetoothGatt == null) {
-            Log.e(TAG, "please connected bluetooth then clear cache.");
+        synchronized (BleManager.class) {
+            if (mBluetoothGatt == null) {
+                Log.e(TAG, "please connected bluetooth then clear cache.");
+                return false;
+            }
+            try {
+                Method e = BluetoothGatt.class.getMethod("refresh", new Class[0]);
+                if (e != null) {
+                    boolean success = ((Boolean) e.invoke(mBluetoothGatt, new Object[0])).booleanValue();
+                    Log.i(TAG, "refresh Device Cache: " + success);
+                    return success;
+                }
+            } catch (Exception exception) {
+                Log.e(TAG, "An exception occured while refreshing device", exception);
+            }
             return false;
         }
-        try {
-            Method e = BluetoothGatt.class.getMethod("refresh", new Class[0]);
-            if (e != null) {
-                boolean success = ((Boolean) e.invoke(mBluetoothGatt, new Object[0])).booleanValue();
-                Log.i(TAG, "refresh Device Cache: " + success);
-                return success;
-            }
-        } catch (Exception exception) {
-            Log.e(TAG, "An exception occured while refreshing device", exception);
-        }
-
-        return false;
     }
 
     boolean addLeListenerList(LeListener leListener) {
@@ -513,7 +527,7 @@ class BleManager {
     private void readRssiTimerTask() {
         mTimer = null;
         mTimerTask = null;
-        mTimer= new Timer();
+        mTimer = new Timer();
         mTimerTask = new TimerTask() {
             @Override
             public void run() {
@@ -554,6 +568,13 @@ class BleManager {
                 }
             }, serviceTimeoutMillis);
         }
+    }
+
+    private void readConnectionParameters() {
+        if (mBluetoothGatt == null) {
+            return;
+        }
+        readCharacteristicQueue(SERVICE, PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
     }
 
     private BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
@@ -640,6 +661,8 @@ class BleManager {
                     }
                 });
 
+                readConnectionParameters();
+
             } else if (status == BluetoothGatt.GATT_FAILURE) {
                 Log.d(TAG, "failure find services discovered.");
                 mServiceDiscovered = false;
@@ -651,6 +674,16 @@ class BleManager {
             super.onCharacteristicRead(gatt, characteristic, status);
             //read
             if (status == BluetoothGatt.GATT_SUCCESS) {
+
+                if (characteristic.getUuid().equals(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID)) {
+                    List<Integer> parameters = Utils.bytes2IntegerList(characteristic.getValue());
+                    connIntervalMin = (parameters.get(1) * 16 + parameters.get(0)) * 1.25;
+                    connIntervalMax = (parameters.get(3) * 16 + parameters.get(2)) * 1.25;
+                    slaveLatency = parameters.get(5) * 16 + parameters.get(4);
+                    connSupervisionTimeout = parameters.get(7) * 16 + parameters.get(6);
+
+                    return;
+                }
 
                 runOnUiThread(new Runnable() {
                     @Override
