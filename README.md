@@ -4,7 +4,7 @@
 ![JitPack.io](https://img.shields.io/crates/l/rustc-serialize.svg)
 ![Release Version](https://img.shields.io/badge/release-0.5.1-red.svg)
 
-[English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
+[English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
 低功耗蓝牙库。**优势**：
 
