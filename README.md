@@ -1,8 +1,8 @@
 
-![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jp)
+![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/crates/l/rustc-serialize.svg)
-![Release Version](https://img.shields.io/badge/release-0.5.0-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.5.1-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
 
