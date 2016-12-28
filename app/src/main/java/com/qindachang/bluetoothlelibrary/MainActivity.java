@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private BluetoothLe mBluetoothLe;
     private StringBuilder mStringBuilder;
+    private Handler mHandler = new Handler();
 
     private BluetoothDevice mBluetoothDevice;
 
@@ -79,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onDeviceConnected() {
                 mStringBuilder.append("蓝牙已连接\n");
                 mTvText.setText(mStringBuilder.toString());
+
             }
 
 
@@ -92,6 +95,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onServicesDiscovered(BluetoothGatt gatt) {
                 mStringBuilder.append("发现服务啦\n");
                 mTvText.setText(mStringBuilder.toString());
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //查看远程蓝牙设备的连接参数，如蓝牙的最小时间间隔和最大时间间隔等..
+                        Log.d("debug", mBluetoothLe.readConnectionParameters().toString());
+                    }
+                }, 1000);
             }
 
             @Override
@@ -151,16 +162,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("debug", "信号强度：" + rssi + "  距离：" + cm + "cm");
                     }
                 });
+
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothLe.destroy(TAG);//由于使用了单例，为避免回调及context持有而产生内存泄露，你需要调用destroy()
-        mBluetoothLe.close();//关闭GATT连接，在destroy()后使用
+        mBluetoothLe.destroy();//使用了没有tag的监听，例如下方的扫描监听，这时需要调用destroy();
+        mBluetoothLe.destroy(TAG);//如果使用的tag的回调监听，例如上面的连接、读取、写等，需要调用destroy(TAG);
+        mBluetoothLe.close();//关闭GATT连接，在你退出应用时使用
     }
 
-    @OnClick({R.id.btn_stop_scan, R.id.btn_disconnect, R.id.btn_clear_text, R.id.btn_write_hr, R.id.btn_write_step, R.id.btn_read, R.id.btn_connect, R.id.btn_scan, R.id.btn_open_notification, R.id.btn_clear_queue, R.id.btn_close_notification, R.id.btn_clear_cache})
+    @OnClick({R.id.btn_stop_scan, R.id.btn_disconnect, R.id.btn_clear_text, R.id.btn_write_hr,
+            R.id.btn_write_step, R.id.btn_read, R.id.btn_connect, R.id.btn_scan, R.id.btn_open_notification,
+            R.id.btn_clear_queue, R.id.btn_close_notification, R.id.btn_clear_cache})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_scan:

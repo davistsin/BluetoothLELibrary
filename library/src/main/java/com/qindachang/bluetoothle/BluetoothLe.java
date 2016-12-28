@@ -327,6 +327,10 @@ public class BluetoothLe {
         mBleManager.readRssi();
     }
 
+    public ConnParameters readConnectionParameters() {
+        return mBleManager.getConnParameters();
+    }
+
     public void close() {
         mBleManager.close();
     }

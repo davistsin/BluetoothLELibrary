@@ -1,4 +1,8 @@
-#BluetoothLE library
+
+![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jp)
+
+![JitPack.io](https://img.shields.io/crates/l/rustc-serialize.svg)
+![Release Version](https://img.shields.io/badge/release-0.5.0-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English")
 
@@ -29,14 +33,13 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.4.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.5.1'
 
 
 **权限：**
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
 
 6.0以上设备需要
 
@@ -67,9 +70,9 @@
 
 	mBluetoothLe.init(this);//必须调用init()初始化
 
-或者使用配置方式进行初始化。
+或者使用配置方式进行初始化，这样你可以针对自己的蓝牙产品，做出个性化的蓝牙队列请求。
 
-新增配置：发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据
+such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据
 
 在Application的onCreate()方法中参照以下方式配置：
 
@@ -85,12 +88,39 @@
         }
     }
 
+当然，你也可以使用自动的方式来配置蓝牙队列请求。这个时间间隔是通过读取远程蓝牙设备的最小间隔和最大间隔计算得出，保证了队列的最大可用性。
+
+    BluetoothConfig config = new BluetoothConfig.Builder()
+            .enableQueueInterval(true)
+            .setQueueIntervalTime(BluetoothConfig.AUTO)
+            .build();
+    BluetoothLe.getDefault().init(this, config);
+
+上述的读取远程蓝牙设备的最小间隔和最大间隔，你可以在连上蓝牙发现服务后读取：
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt) {
+            mStringBuilder.append("发现服务啦\n");
+            mTvText.setText(mStringBuilder.toString());
+
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //查看远程蓝牙设备的连接参数，如蓝牙的最小时间间隔和最大时间间隔等..
+                    Log.d("debug", mBluetoothLe.readConnectionParameters().toString());
+                }
+            }, 1000);
+        }
+
+
+在使用途中修改以上配置：
+
 修改配置：
 
     BluetoothConfig config = new BluetoothConfig.Builder()
                     .enableQueueInterval(false)
                     .build();
-            mBluetoothLe.changeConfig(config);
+    mBluetoothLe.changeConfig(config);
 
 **三、扫描**
 
@@ -350,7 +380,7 @@
 
 ##了解更多
 
-1. See Demo： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") / [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
+1. 强烈建议阅读Demo ： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") / [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
 2. QQ: 714275846 / 823951895
 3. 邮箱：qindachang@outlook.com
 4. 博客：http://blog.csdn.net/u013003052
@@ -392,3 +422,7 @@
 8. [Version 0.4.2]
 
    fix:蓝牙信号强度监听
+
+9. [Version 0.5.0]
+
+   增加：队列时间间隔设置自动，完全可以像iOS一样去操作蓝牙啦

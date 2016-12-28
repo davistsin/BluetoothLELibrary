@@ -65,6 +65,7 @@ class BleManager {
     private double connIntervalMax;
     private int slaveLatency;
     private int connSupervisionTimeout;
+    private int autoQueueInterval = 400;
 
     private int queueDelayTime;
     private boolean enableQueueDelay;
@@ -77,6 +78,7 @@ class BleManager {
     private Context mContext;
 
     private BluetoothGatt mBluetoothGatt;
+    private ConnParameters mConnParameters = new ConnParameters();
 
     private OnLeScanListener mOnLeScanListener;
     private OnLeConnectListener mOnLeConnectListener;
@@ -577,6 +579,10 @@ class BleManager {
         readCharacteristicQueue(SERVICE, PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
     }
 
+    ConnParameters getConnParameters() {
+        return mConnParameters;
+    }
+
     private BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
         @Override
@@ -681,7 +687,13 @@ class BleManager {
                     connIntervalMax = (parameters.get(3) * 16 + parameters.get(2)) * 1.25;
                     slaveLatency = parameters.get(5) * 16 + parameters.get(4);
                     connSupervisionTimeout = parameters.get(7) * 16 + parameters.get(6);
-
+                    mConnParameters.setUUID(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
+                    mConnParameters.setConnIntervalMin(connIntervalMin);
+                    mConnParameters.setConnIntervalMax(connIntervalMax);
+                    mConnParameters.setProperties("READ");
+                    mConnParameters.setSlaveLatency(slaveLatency);
+                    mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
+                    autoQueueInterval = (int) (connIntervalMin + connIntervalMax);
                     return;
                 }
 
@@ -935,12 +947,21 @@ class BleManager {
 
         void next() {
             if (enableQueueDelay) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        runQueue();
-                    }
-                }, queueDelayTime);
+                if (queueDelayTime < 0) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            runQueue();
+                        }
+                    }, autoQueueInterval);
+                } else {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            runQueue();
+                        }
+                    }, queueDelayTime);
+                }
             } else {
                 runQueue();
             }
