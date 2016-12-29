@@ -1,8 +1,8 @@
 
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
-![JitPack.io](https://img.shields.io/crates/l/rustc-serialize.svg)
-![Release Version](https://img.shields.io/badge/release-0.5.1-red.svg)
+![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
+![Release Version](https://img.shields.io/badge/release-0.5.2-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
@@ -33,7 +33,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.5.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.5.2'
 
 
 **权限：**
@@ -127,6 +127,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 扫描过程已携带6.0动态权限申请：地理位置权限
 
     mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒，默认10秒
+                .setScanWithDeviceAddress("00:20:ff:34:aa:b3")//根据硬件地址过滤扫描
                 .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
@@ -156,6 +157,12 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
                         tv_text.setText(mStringBuilder.toString());
                     }
                 });
+
+根据多个硬件地址、服务uuid、设备名称过滤扫描，你可以这样：
+
+    .setScanWithDeviceAddress(new String[]{"00:20:ff:34:aa:b3","f3:84:55:b4:ab:7f"})
+    .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})
+    .setScanWithDeviceName(new String[]{"ZG1616","HaHa"})
 
 获取蓝牙扫描状态：
 
@@ -426,3 +433,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 9. [Version 0.5.0]
 
    增加：队列时间间隔设置自动，完全可以像iOS一样去操作蓝牙啦
+
+10. [Version 0.5.2]
+
+   过滤扫描可以根据多个uuid等

@@ -231,7 +231,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒,默认10秒
 //                .setScanWithDeviceAddress("00:20:ff:34:aa:b3")
-//                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
+                .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})//设置根据服务uuid过滤扫描
+
 //                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
                 .startScan(this, new OnLeScanListener() {

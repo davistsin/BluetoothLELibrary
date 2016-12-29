@@ -6,6 +6,9 @@ import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class BluetoothLe {
@@ -23,9 +26,9 @@ public class BluetoothLe {
 
     private BleManager mBleManager;
 
-    private String filterDeviceName;
-    private String filterDeviceAddress;
-    private UUID uFilerServiceUUID;
+    private List<String> filterDeviceNameList = new ArrayList<>();
+    private List<String> filterDeviceAddressList = new ArrayList<>();
+    private List<UUID> uFilerServiceUUIDList = new ArrayList<>();
     private int scanPeriod;
     private int reportDelayMillis;
 
@@ -64,12 +67,22 @@ public class BluetoothLe {
     }
 
     public BluetoothLe setScanWithDeviceName(String deviceName) {
-        this.filterDeviceName = deviceName;
+        this.filterDeviceNameList.add(deviceName);
+        return this;
+    }
+
+    public BluetoothLe setScanWithDeviceName(String[] deviceNames) {
+        Collections.addAll(this.filterDeviceNameList, deviceNames);
         return this;
     }
 
     public BluetoothLe setScanWithDeviceAddress(String deviceAddress) {
-        this.filterDeviceAddress = deviceAddress;
+        this.filterDeviceAddressList.add(deviceAddress);
+        return this;
+    }
+
+    public BluetoothLe setScanWithDeviceAddress(String[] deviceAddress) {
+        Collections.addAll(this.filterDeviceAddressList, deviceAddress);
         return this;
     }
 
@@ -78,8 +91,20 @@ public class BluetoothLe {
         return this;
     }
 
+    public BluetoothLe setScanWithServiceUUID(String[] serviceUUIDs) {
+        for (String serviceUUID : serviceUUIDs) {
+            setScanWithServiceUUID(UUID.fromString(serviceUUID));
+        }
+        return this;
+    }
+
     public BluetoothLe setScanWithServiceUUID(UUID serviceUUID) {
-        this.uFilerServiceUUID = serviceUUID;
+        this.uFilerServiceUUIDList.add(serviceUUID);
+        return this;
+    }
+
+    public BluetoothLe setScanWithServiceUUID(UUID[] serviceUUIDs) {
+        Collections.addAll(this.uFilerServiceUUIDList, serviceUUIDs);
         return this;
     }
 
@@ -95,20 +120,20 @@ public class BluetoothLe {
 
     public void startScan(Activity activity, OnLeScanListener onLeScanListener) {
         mBleManager.setOnLeScanListener(onLeScanListener);
-        mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
-        filterDeviceName = null;
-        filterDeviceAddress = null;
-        uFilerServiceUUID = null;
+        mBleManager.scan(activity, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
+        filterDeviceNameList.clear();
+        filterDeviceAddressList.clear();
+        uFilerServiceUUIDList.clear();
         scanPeriod = 0;
     }
 
     public void startScan(@NonNull Object tag, Activity activity, OnLeScanListener onLeScanListener) {
         onLeScanListener.setTag(tag);
         mBleManager.addLeListenerList(onLeScanListener);
-        mBleManager.scan(activity, filterDeviceName, filterDeviceAddress, uFilerServiceUUID, scanPeriod, reportDelayMillis);
-        filterDeviceName = null;
-        filterDeviceAddress = null;
-        uFilerServiceUUID = null;
+        mBleManager.scan(activity, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
+        filterDeviceNameList = null;
+        filterDeviceAddressList = null;
+        uFilerServiceUUIDList = null;
         scanPeriod = 0;
     }
 

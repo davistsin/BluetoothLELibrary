@@ -185,7 +185,9 @@ class BleManager {
         mOnLeScanListener = onLeScanListener;
     }
 
-    void scan(Activity activity, String filterDeviceName, String filterDeviceAddress, UUID uFilerServiceUUID,
+
+
+    void scan(Activity activity, List<String> filterDeviceNameList, List<String> filterDeviceAddressList, List<UUID> filerServiceUUIDList,
               int scanPeriod, int reportDelayMillis) {
         Log.d(TAG, "bluetooth le scanning...");
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -208,19 +210,20 @@ class BleManager {
                 .setUseHardwareBatchingIfSupported(false)
                 .build();
         List<ScanFilter> filters = new ArrayList<>();
-        if (filterDeviceName != null) {
-            ScanFilter builder = new ScanFilter.Builder().setDeviceName(filterDeviceName).build();
+        for (String deviceName : filterDeviceNameList) {
+            ScanFilter builder = new ScanFilter.Builder().setDeviceName(deviceName).build();
             filters.add(builder);
         }
-        if (filterDeviceAddress != null) {
-            ScanFilter builder = new ScanFilter.Builder().setDeviceAddress(filterDeviceAddress).build();
+        for (String deviceAddress : filterDeviceAddressList) {
+            ScanFilter builder = new ScanFilter.Builder().setDeviceAddress(deviceAddress).build();
             filters.add(builder);
         }
-        if (uFilerServiceUUID != null) {
+        for (UUID serviceUUID : filerServiceUUIDList) {
             ScanFilter builder = new ScanFilter.Builder()
-                    .setServiceUuid(ParcelUuid.fromString(uFilerServiceUUID.toString())).build();
+                    .setServiceUuid(ParcelUuid.fromString(serviceUUID.toString())).build();
             filters.add(builder);
         }
+
         scannerCompat.startScan(filters, scanSettings, scanCallback);
 
         int SCAN_DURATION = scanPeriod;
