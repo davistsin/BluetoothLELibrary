@@ -186,7 +186,6 @@ class BleManager {
     }
 
 
-
     void scan(Activity activity, List<String> filterDeviceNameList, List<String> filterDeviceAddressList, List<UUID> filerServiceUUIDList,
               int scanPeriod, int reportDelayMillis) {
         Log.d(TAG, "bluetooth le scanning...");
@@ -697,22 +696,21 @@ class BleManager {
                     mConnParameters.setSlaveLatency(slaveLatency);
                     mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
                     autoQueueInterval = (int) (connIntervalMin + connIntervalMax);
-                    return;
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (LeListener leListener : mListenerList) {
-                            if (leListener instanceof OnLeReadCharacteristicListener) {
-                                ((OnLeReadCharacteristicListener) leListener).onSuccess(characteristic);
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (LeListener leListener : mListenerList) {
+                                if (leListener instanceof OnLeReadCharacteristicListener) {
+                                    ((OnLeReadCharacteristicListener) leListener).onSuccess(characteristic);
+                                }
+                            }
+                            if (mOnLeReadCharacteristicListener != null) {
+                                mOnLeReadCharacteristicListener.onSuccess(characteristic);
                             }
                         }
-                        if (mOnLeReadCharacteristicListener != null) {
-                            mOnLeReadCharacteristicListener.onSuccess(characteristic);
-                        }
-                    }
-                });
+                    });
+                }
 
             } else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 

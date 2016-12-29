@@ -2,7 +2,7 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.5.2-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.5.3-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
@@ -33,7 +33,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.5.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.5.3'
 
 
 **权限：**
