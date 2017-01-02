@@ -388,10 +388,9 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 ##了解更多
 
 1. 强烈建议阅读Demo ： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") / [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
-2. QQ: 714275846 / 823951895
-3. 邮箱：qindachang@outlook.com
-4. 博客：http://blog.csdn.net/u013003052
-5. Github: https://github.com/qindachang
+2. 邮箱：qindachang@outlook.com
+3. 博客：http://blog.csdn.net/u013003052
+4. Github: https://github.com/qindachang
 
 ##版本迭代
 1. [Version 0.1.0](https://github.com/qindachang/BluetoothLELibrary/blob/master/document/version-0.1.0.md "Version 0.1.0")

@@ -22,7 +22,6 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,11 +37,10 @@ import no.nordicsemi.android.support.v18.scanner.ScanFilter;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 
-import static android.bluetooth.BluetoothDevice.TRANSPORT_BREDR;
 import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
 
-class BleManager {
+/* package */ class BleManager {
 
     private static final String TAG = BleManager.class.getSimpleName();
 
@@ -184,7 +182,6 @@ class BleManager {
     void setOnLeScanListener(OnLeScanListener onLeScanListener) {
         mOnLeScanListener = onLeScanListener;
     }
-
 
     void scan(Activity activity, List<String> filterDeviceNameList, List<String> filterDeviceAddressList, List<UUID> filerServiceUUIDList,
               int scanPeriod, int reportDelayMillis) {
@@ -695,7 +692,7 @@ class BleManager {
                     mConnParameters.setProperties("READ");
                     mConnParameters.setSlaveLatency(slaveLatency);
                     mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
-                    autoQueueInterval = (int) (connIntervalMin + connIntervalMax);
+                    autoQueueInterval = (int) connIntervalMax;
                 } else {
                     runOnUiThread(new Runnable() {
                         @Override
