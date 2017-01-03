@@ -652,6 +652,8 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 Log.d(TAG, "success with find services discovered .");
                 mServiceDiscovered = true;
 
+                readConnectionParameters();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -665,8 +667,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                         }
                     }
                 });
-
-                readConnectionParameters();
 
             } else if (status == BluetoothGatt.GATT_FAILURE) {
                 Log.d(TAG, "failure find services discovered.");
@@ -692,7 +692,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     mConnParameters.setProperties("READ");
                     mConnParameters.setSlaveLatency(slaveLatency);
                     mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
-                    autoQueueInterval = (int) connIntervalMax;
+                    autoQueueInterval = (int) connIntervalMax + 50;
                 } else {
                     runOnUiThread(new Runnable() {
                         @Override

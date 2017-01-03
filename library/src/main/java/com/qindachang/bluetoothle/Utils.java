@@ -10,9 +10,9 @@ import java.util.List;
  * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
  */
 
-/* package */ final class Utils {
+public class Utils {
 
-    static int getDistance(int rssi) {
+    public static int getDistance(int rssi) {
         int irssi = Math.abs(rssi);
         double power = (irssi - 70.0) / (10 * 2.0);
         power = Math.pow(10d, power);
@@ -20,7 +20,7 @@ import java.util.List;
         return (int) power;
     }
 
-    static List<Integer> bytes2IntegerList(byte[] bytes) {
+    public static List<Integer> bytes2IntegerList(byte[] bytes) {
         List<Integer> list = new ArrayList<>();
         for (byte aByte : bytes) {
             int v = aByte & 0xFF;
