@@ -364,6 +364,10 @@ public class BluetoothLe {
         return mBleManager.getConnParameters();
     }
 
+    public void stopReadRssi() {
+        mBleManager.cancelReadRssiTimerTask();
+    }
+
     public void close() {
         mBleManager.close();
     }

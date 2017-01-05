@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+
+
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
         mBluetoothLe.init(this);//必须调用init()初始化
 
@@ -163,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
 
-
     }
 
     @Override
@@ -238,14 +239,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .startScan(this, new OnLeScanListener() {
                     @Override
                     public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
-                        mStringBuilder.append("扫描到设备：" + bluetoothDevice.getName() + "-信号强度：" + rssi + "\n");
+                        mStringBuilder.append("扫描到设备：").append(bluetoothDevice.getName()).append("-信号强度：").append(rssi).append("\n");
                         mTvText.setText(mStringBuilder.toString());
                         mBluetoothDevice = bluetoothDevice;
                     }
 
                     @Override
                     public void onBatchScanResults(List<ScanResult> results) {
-                        mStringBuilder.append("批处理信息：" + results.toString() + "\n");
+                        mStringBuilder.append("批处理信息：").append(results.toString()).append("\n");
                         mTvText.setText(mStringBuilder.toString());
                     }
 

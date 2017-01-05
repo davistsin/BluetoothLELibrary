@@ -514,7 +514,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         readRssiIntervalMillisecond = millisecond;
     }
 
-    private void cancelReadRssiTimerTask() {
+    void cancelReadRssiTimerTask() {
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
@@ -668,7 +668,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     }
                 });
 
-            } else if (status == BluetoothGatt.GATT_FAILURE) {
+            } else {
                 Log.d(TAG, "failure find services discovered.");
                 mServiceDiscovered = false;
             }
@@ -872,11 +872,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     };
 
     void destroy() {
-        mOnLeScanListener = null;
-        mOnLeConnectListener = null;
-        mOnLeNotificationListener = null;
-        mOnLeWriteCharacteristicListener = null;
-        mOnLeReadCharacteristicListener = null;
+        synchronized (BleManager.class) {
+            mOnLeScanListener = null;
+            mOnLeConnectListener = null;
+            mOnLeNotificationListener = null;
+            mOnLeWriteCharacteristicListener = null;
+            mOnLeReadCharacteristicListener = null;
+        }
     }
 
     void destroy(Object tag) {
@@ -884,13 +886,15 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     }
 
     void cancelTag(Object tag) {
-        List<LeListener> leListenerList = new ArrayList<>();
-        for (LeListener leListener : mListenerList) {
-            if (leListener.getTag() == tag) {
-                leListenerList.add(leListener);
+        synchronized (BleManager.class) {
+            List<LeListener> leListenerList = new ArrayList<>();
+            for (LeListener leListener : mListenerList) {
+                if (leListener.getTag() == tag) {
+                    leListenerList.add(leListener);
+                }
             }
+            cancelTagList(leListenerList);
         }
-        cancelTagList(leListenerList);
     }
 
     private void cancelTagList(List<LeListener> list) {
@@ -904,27 +908,31 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     }
 
     void cancelAllTag() {
-        mListenerList.clear();
+        synchronized (BleManager.class) {
+            mListenerList.clear();
+        }
     }
 
     void clearQueue() {
-        mRequestQueue.cancelAll();
+        synchronized (BleManager.class) {
+            mRequestQueue.cancelAll();
+        }
     }
 
     private class RequestQueue {
 
-        private Queue<Request> mRequestBlockingQueue = new LinkedList<>();
+        private Queue<Request> mRequestQueue = new LinkedList<>();
 
         void addRequest(Request request) {
-            int oldSize = mRequestBlockingQueue.size();
-            mRequestBlockingQueue.add(request);
-            if (mRequestBlockingQueue.size() == 1 && oldSize == 0) {
+            int oldSize = mRequestQueue.size();
+            mRequestQueue.add(request);
+            if (mRequestQueue.size() == 1 && oldSize == 0) {
                 startExecutor();
             }
         }
 
         private void startExecutor() {
-            Request request = mRequestBlockingQueue.peek();
+            Request request = mRequestQueue.peek();
             switch (request.type) {
                 case WRITE:
                     BluetoothGattCharacteristic characteristic = request.getCharacteristic();
@@ -966,14 +974,14 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         }
 
         void runQueue() {
-            mRequestBlockingQueue.poll();
-            if (mRequestBlockingQueue != null && mRequestBlockingQueue.size() > 0) {
+            mRequestQueue.poll();
+            if (mRequestQueue != null && mRequestQueue.size() > 0) {
                 startExecutor();
             }
         }
 
         void cancelAll() {
-            mRequestBlockingQueue.clear();
+            mRequestQueue.clear();
         }
 
     }
