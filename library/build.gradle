@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 24
-        versionCode 19
-        versionName "1.5.7"
+        versionCode 20
+        versionName "1.5.8"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -32,7 +32,7 @@ publish {
     userOrg = 'qindachang'
     groupId = 'com.qindachang'
     artifactId = 'BluetoothLELibrary'
-    publishVersion = '0.5.7'
+    publishVersion = '0.5.8'
     desc = 'Android Bluetooth LE library'
     website = 'https://github.com/qindachang/BluetoothLELibrary'
 }

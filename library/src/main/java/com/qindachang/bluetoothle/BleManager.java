@@ -419,8 +419,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     void enableNotificationQueue(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
-        for (UUID characteristicUUID : characteristicUUIDs) {
-            mRequestQueue.addRequest(Request.newEnableNotificationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+        if (service != null) {
+            for (UUID characteristicUUID : characteristicUUIDs) {
+                mRequestQueue.addRequest(Request.newEnableNotificationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+            }
         }
     }
 
@@ -451,8 +453,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     void enableIndicationQueue(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
-        for (UUID characteristicUUID : characteristicUUIDs) {
-            mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+        if (service != null) {
+            for (UUID characteristicUUID : characteristicUUIDs) {
+                mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+            }
         }
     }
 
@@ -462,8 +466,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             return;
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
-        BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
-        mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
+        if (service != null) {
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+            mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
+        }
     }
 
     private boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
@@ -483,8 +489,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     void readCharacteristicQueue(UUID serviceUUID, UUID characteristicUUID) {
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
-        BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
-        mRequestQueue.addRequest(Request.newReadRequest(characteristic));
+        if (service != null) {
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+            mRequestQueue.addRequest(Request.newReadRequest(characteristic));
+        }
     }
 
     private boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
@@ -612,8 +620,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     @Override
                     public void run() {
                         if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
-                            mBluetoothGatt.discoverServices();
-                            checkServiceDiscover();
+                            if (mBluetoothGatt != null) {
+                                mBluetoothGatt.discoverServices();
+                                checkServiceDiscover();
+                            }
                         }
                     }
                 }, 600);
@@ -936,7 +946,9 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             switch (request.type) {
                 case WRITE:
                     BluetoothGattCharacteristic characteristic = request.getCharacteristic();
-                    characteristic.setValue(request.getBytes());
+                    if (characteristic != null) {
+                        characteristic.setValue(request.getBytes());
+                    }
                     writeCharacteristic(characteristic);
                     break;
                 case READ:
