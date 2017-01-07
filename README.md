@@ -2,7 +2,7 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.5.8-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.6.0-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
@@ -33,7 +33,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.5.8'
+	compile 'com.qindachang:BluetoothLELibrary:0.6.0'
 
 
 **权限：**
@@ -442,3 +442,10 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 10. [Version 0.5.2]
 
    过滤扫描可以根据多个uuid等
+
+###Thanks
+
+[NordicSemiconductor](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library "NordicSemiconductor")
+
+1. [philips77](https://github.com/philips77 "philips77")
+2. [aldoborrero](https://github.com/aldoborrero "aldoborrero")

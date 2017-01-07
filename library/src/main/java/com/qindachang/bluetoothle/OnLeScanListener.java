@@ -2,10 +2,10 @@ package com.qindachang.bluetoothle;
 
 import android.bluetooth.BluetoothDevice;
 
-import java.util.List;
+import com.qindachang.bluetoothle.scanner.ScanRecord;
+import com.qindachang.bluetoothle.scanner.ScanResult;
 
-import no.nordicsemi.android.support.v18.scanner.ScanRecord;
-import no.nordicsemi.android.support.v18.scanner.ScanResult;
+import java.util.List;
 
 
 public abstract class OnLeScanListener extends LeListener {

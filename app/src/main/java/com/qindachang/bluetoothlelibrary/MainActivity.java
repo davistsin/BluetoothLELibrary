@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.qindachang.bluetoothle.BluetoothConfig;
 import com.qindachang.bluetoothle.BluetoothLe;
 import com.qindachang.bluetoothle.OnLeConnectListener;
 import com.qindachang.bluetoothle.OnLeNotificationListener;
@@ -18,6 +17,8 @@ import com.qindachang.bluetoothle.OnLeReadCharacteristicListener;
 import com.qindachang.bluetoothle.OnLeReadRssiListener;
 import com.qindachang.bluetoothle.OnLeScanListener;
 import com.qindachang.bluetoothle.OnLeWriteCharacteristicListener;
+import com.qindachang.bluetoothle.scanner.ScanRecord;
+import com.qindachang.bluetoothle.scanner.ScanResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,13 +26,16 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import no.nordicsemi.android.support.v18.scanner.ScanRecord;
-import no.nordicsemi.android.support.v18.scanner.ScanResult;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    /**
+     * 以下uuid仅作为作者本人实际硬件的使用，请你更换为你所使用的uuid，如果不明白，可以去询问你的硬件工程师
+     *
+     * **/
     private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
     private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
     private static final String STEP_NOTIFICATION_UUID = "0000fff3-0000-1000-8000-00805f9b34fb";
@@ -55,22 +59,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-
-
         mBluetoothLe = BluetoothLe.getDefault();//获取单例对象
-        mBluetoothLe.init(this);//必须调用init()初始化
-
         mStringBuilder = new StringBuilder();
 
         if (!mBluetoothLe.isBluetoothOpen()) {
             mBluetoothLe.enableBluetooth(this);
         }
 
-        BluetoothConfig config = new BluetoothConfig.Builder()
-                .enableQueueInterval(false)
-                .build();
-        mBluetoothLe.changeConfig(config);
 
         mBluetoothLe.setOnConnectListener(TAG, new OnLeConnectListener() {
             @Override
@@ -170,8 +165,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothLe.destroy();//使用了没有tag的监听，例如下方的扫描监听，这时需要调用destroy();
-        mBluetoothLe.destroy(TAG);//如果使用的tag的回调监听，例如上面的连接、读取、写等，需要调用destroy(TAG);
+        //为避免内存泄露
+        mBluetoothLe.destroy();//使用了没有tag的监听，例如下方232行的扫描监听，这时需要调用destroy();
+        mBluetoothLe.destroy(TAG);//如果使用的tag的回调监听，例如上面66行的连接、读取、写等，需要调用destroy(TAG);
+
         mBluetoothLe.close();//关闭GATT连接，在你退出应用时使用
     }
 
@@ -231,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBluetoothLe.stopScan();
         }
         mBluetoothLe.setScanPeriod(25000)//设置扫描时长，单位毫秒,默认10秒
-                .setScanWithDeviceAddress("C2:53:32:7C:00:30")
+ //               .setScanWithDeviceAddress("C2:53:32:7C:00:30")
  //               .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})//设置根据服务uuid过滤扫描
 
 //                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
@@ -286,15 +283,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openAllNotification() {
         if (mBluetoothLe.getServicesDiscovered()) {
-            mBluetoothLe.enableNotification(true, SERVICE_UUID,
-                    new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+            mBluetoothLe.enableNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
         }
     }
 
     private void closeAllNotification() {
         if (mBluetoothLe.getServicesDiscovered()) {
-            mBluetoothLe.enableNotification(false, SERVICE_UUID,
-                    new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+            mBluetoothLe.enableNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
         }
     }
 

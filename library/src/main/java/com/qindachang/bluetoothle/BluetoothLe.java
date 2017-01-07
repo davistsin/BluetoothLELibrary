@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016, Qin Dachang
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.qindachang.bluetoothle;
 
 import android.app.Activity;
@@ -145,6 +167,7 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
+    @Deprecated
     public void setOnScanListener(OnLeScanListener onLeScanListener) {
         mBleManager.setOnLeScanListener(onLeScanListener);
     }
@@ -211,15 +234,18 @@ public class BluetoothLe {
         mBleManager.connect(autoConnect, bluetoothDevice);
     }
 
+    @Deprecated
     public void startConnect(BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
         startConnect(false, bluetoothDevice, onLeConnectListener);
     }
 
+    @Deprecated
     public void startConnect(boolean autoConnect, BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
         setOnConnectListener(onLeConnectListener);
         mBleManager.connect(autoConnect, bluetoothDevice);
     }
 
+    @Deprecated
     public void setOnConnectListener(OnLeConnectListener onLeConnectListener) {
         mBleManager.setConnectListener(onLeConnectListener);
     }
@@ -258,6 +284,7 @@ public class BluetoothLe {
         return this;
     }
 
+    @Deprecated
     public void setOnNotificationListener(OnLeNotificationListener onLeNotificationListener) {
         mBleManager.setOnLeNotificationListener(onLeNotificationListener);
     }
@@ -305,15 +332,18 @@ public class BluetoothLe {
         mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
     }
 
+    @Deprecated
     public void readCharacteristic(String serviceUUID, String characteristicUUID, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
         readCharacteristic(UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID), onLeReadCharacteristicListener);
     }
 
+    @Deprecated
     public void readCharacteristic(UUID serviceUUID, UUID characteristicUUID, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
         mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
         setOnReadCharacteristicListener(onLeReadCharacteristicListener);
     }
 
+    @Deprecated
     public void setOnReadCharacteristicListener(OnLeReadCharacteristicListener onReadCharacteristicListener) {
         mBleManager.setOnLeReadCharacteristicListener(onReadCharacteristicListener);
     }
@@ -331,15 +361,18 @@ public class BluetoothLe {
         mBleManager.writeCharacteristicQueue(bytes, serviceUUID, characteristicUUID);
     }
 
+    @Deprecated
     public void writeDataToCharacteristic(byte[] bytes, String serviceUUID, String characteristicUUID, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         writeDataToCharacteristic(bytes, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID), onLeWriteCharacteristicListener);
     }
 
+    @Deprecated
     public void writeDataToCharacteristic(byte[] bytes, UUID serviceUUID, UUID characteristicUUID, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         setOnWriteCharacteristicListener(onLeWriteCharacteristicListener);
         mBleManager.writeCharacteristicQueue(bytes, serviceUUID, characteristicUUID);
     }
 
+    @Deprecated
     public void setOnWriteCharacteristicListener(OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         mBleManager.setWriteCharacteristicListener(onLeWriteCharacteristicListener);
     }
