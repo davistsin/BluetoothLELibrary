@@ -152,7 +152,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
                     }
 
                     @Override
-                    public void onScanFailed(int code) {
+                    public void onScanFailed(int status) {
                         mStringBuilder.append("扫描错误\n");
                         tv_text.setText(mStringBuilder.toString());
                     }

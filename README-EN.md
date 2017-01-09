@@ -68,7 +68,7 @@ Android 6.0 above
                     }
 
                     @Override
-                    public void onScanFailed(int code) {
+                    public void onScanFailed(int status) {
                         mStringBuilder.append("scan error! \n");
                         tv_text.setText(mStringBuilder.toString());
                     }

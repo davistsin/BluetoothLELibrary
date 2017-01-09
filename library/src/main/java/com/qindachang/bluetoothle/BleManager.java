@@ -40,8 +40,12 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
+import com.qindachang.bluetoothle.exception.BleException;
+import com.qindachang.bluetoothle.exception.ConnBleException;
+import com.qindachang.bluetoothle.exception.ReadBleException;
+import com.qindachang.bluetoothle.exception.ScanBleException;
+import com.qindachang.bluetoothle.exception.WriteBleException;
 import com.qindachang.bluetoothle.scanner.BluetoothLeScannerCompat;
 import com.qindachang.bluetoothle.scanner.ScanCallback;
 import com.qindachang.bluetoothle.scanner.ScanFilter;
@@ -89,6 +93,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     private int queueDelayTime;
     private boolean enableQueueDelay;
+    private boolean enableLogger;
 
     private boolean isReadRssi;
 
@@ -121,13 +126,15 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     BleManager(Context context, BluetoothConfig config) {
         mContext = context;
-        queueDelayTime = config.wtfQueueDelayTime();
-        enableQueueDelay = config.wtfEnableQueueDelay();
+        queueDelayTime = config.getQueueDelayTime();
+        enableQueueDelay = config.getEnableQueueDelay();
+        enableLogger = config.getEnableLogger();
     }
 
     void setConfig(BluetoothConfig config) {
-        queueDelayTime = config.wtfQueueDelayTime();
-        enableQueueDelay = config.wtfEnableQueueDelay();
+        queueDelayTime = config.getQueueDelayTime();
+        enableQueueDelay = config.getEnableQueueDelay();
+        enableLogger = config.getEnableLogger();
     }
 
     boolean isBluetoothOpen() {
@@ -139,11 +146,11 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         synchronized (BleManager.class) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {
-                Log.e(TAG, "false. your device does not support bluetooth. ");
+                BleLogger.e(enableLogger, TAG, "false. your device does not support bluetooth. ");
                 return false;
             }
             if (bluetoothAdapter.isEnabled()) {
-                Log.d(TAG, "false. your device has been turn on bluetooth.");
+                BleLogger.d(enableLogger, TAG, "false. your device has been turn on bluetooth.");
                 return false;
             }
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -159,7 +166,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 bluetoothAdapter.disable();
                 return true;
             } else {
-                Log.d(TAG, "false. your device has been turn off Bluetooth.");
+                BleLogger.d(enableLogger, TAG, "false. your device has been turn off Bluetooth.");
                 return false;
             }
         }
@@ -180,18 +187,18 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     boolean clearDeviceCache() {
         synchronized (BleManager.class) {
             if (mBluetoothGatt == null) {
-                Log.e(TAG, "please connected bluetooth then clear cache.");
+                BleLogger.e(enableLogger, TAG, "please connected bluetooth then clear cache.");
                 return false;
             }
             try {
                 Method e = BluetoothGatt.class.getMethod("refresh", new Class[0]);
                 if (e != null) {
                     boolean success = ((Boolean) e.invoke(mBluetoothGatt, new Object[0])).booleanValue();
-                    Log.i(TAG, "refresh Device Cache: " + success);
+                    BleLogger.i(enableLogger, TAG, "refresh Device Cache: " + success);
                     return success;
                 }
             } catch (Exception exception) {
-                Log.e(TAG, "An exception occured while refreshing device", exception);
+                BleLogger.e(enableLogger, TAG, "An exception occured while refreshing device", exception);
             }
             return false;
         }
@@ -207,7 +214,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     void scan(Activity activity, List<String> filterDeviceNameList, List<String> filterDeviceAddressList, List<UUID> filerServiceUUIDList,
               int scanPeriod, int reportDelayMillis) {
-        Log.d(TAG, "bluetooth le scanning...");
+        BleLogger.d(enableLogger, TAG, "bluetooth le scanning...");
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
@@ -272,7 +279,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             if (mOnLeScanListener != null) {
                 mOnLeScanListener.onScanCompleted();
             }
-            Log.d(TAG, "bluetooth le scan has stop.");
+            BleLogger.d(enableLogger, TAG, "bluetooth le scan has stop.");
         }
     }
 
@@ -314,11 +321,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         public void onScanFailed(final int errorCode) {
             for (LeListener leListener : mListenerList) {
                 if (leListener instanceof OnLeScanListener) {
-                    ((OnLeScanListener) leListener).onScanFailed(errorCode);
+                    ((OnLeScanListener) leListener).onScanFailed(
+                            new ScanBleException(errorCode, BleException.SCAN));
                 }
             }
             if (mOnLeScanListener != null) {
-                mOnLeScanListener.onScanFailed(errorCode);
+                mOnLeScanListener.onScanFailed(
+                        new ScanBleException(errorCode, BleException.SCAN));
             }
         }
     };
@@ -342,25 +351,38 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     boolean connect(boolean autoConnect, final BluetoothDevice device) {
         mAutoConnect = autoConnect;
         mBluetoothDevice = device;
-        if (mConnected) {
-            Log.d(TAG, "Bluetooth has been connected. connect false.");
+        if (mBluetoothDevice == null) {
             for (LeListener leListener : mListenerList) {
                 if (leListener instanceof OnLeConnectListener) {
-                    ((OnLeConnectListener) leListener).onDeviceConnectFail();
+                    ((OnLeConnectListener) leListener).onDeviceConnectFail(
+                            new ConnBleException(233, BleException.CONNECT,
+                                    "bluetoothDevice.connectGatt(..) on a null object reference. check bluetoothDevice object is not null.")
+                    );
+                }
+            }
+            return false;
+        }
+        if (mConnected) {
+            BleLogger.d(enableLogger, TAG, "Bluetooth has been connected. connect false.");
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeConnectListener) {
+                    ((OnLeConnectListener) leListener).onDeviceConnectFail(
+                            new ConnBleException(0, BleException.CONNECT, "Bluetooth has been connected. connect false."));
                 }
             }
             if (mOnLeConnectListener != null) {
-                mOnLeConnectListener.onDeviceConnectFail();
+                mOnLeConnectListener.onDeviceConnectFail(
+                        new ConnBleException(0, BleException.CONNECT, "Bluetooth has been connected. connect false."));
             }
             return false;
         }
         if (mBluetoothGatt != null) {
-            Log.d(TAG, "The BluetoothGatt already exist, set it close() and null.");
+            BleLogger.d(enableLogger, TAG, "The BluetoothGatt already exist, set it close() and null.");
             mBluetoothGatt.close();
             mBluetoothGatt = null;
             mConnected = false;
         }
-        Log.d(TAG, "create new device connection for BluetoothGatt. ");
+        BleLogger.d(enableLogger, TAG, "create new device connection for BluetoothGatt. ");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback, TRANSPORT_LE);
@@ -421,29 +443,93 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     private boolean enableNotification(boolean enable, BluetoothGattCharacteristic characteristic) {
         final BluetoothGatt gatt = mBluetoothGatt;
-        if (gatt == null || characteristic == null)
+        if (gatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered."));
+                }
+            }
             return false;
+        }
+        if (characteristic == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "characteristic uuid is null."));
+                }
+            }
+            return false;
+        }
         final int properties = characteristic.getProperties();
         if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0) {
-            Log.e(TAG, "uuid:" + characteristic.getUuid() + ", does not support notification");
+            BleLogger.d(enableLogger, TAG, "uuid:" + characteristic.getUuid() + ", does not support notification");
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "characteristic uuid : " + characteristic.getUuid() + ", does not support notification"));
+                }
+            }
             return false;
         }
         gatt.setCharacteristicNotification(characteristic, enable);
-        Log.d(TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
+        BleLogger.d(enableLogger, TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
         final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
         if (descriptor != null) {
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            Log.d(TAG, "writeDescriptor(notification), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+            BleLogger.d(enableLogger, TAG, "writeDescriptor(notification), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
             return gatt.writeDescriptor(descriptor);
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "characteristic uuid : " + characteristic.getUuid() + ", does not contain descriptor."));
+                }
+            }
+            return false;
         }
-        return false;
     }
 
     void enableNotificationQueue(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        if (mBluetoothGatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered."));
+                }
+            }
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service != null) {
             for (UUID characteristicUUID : characteristicUUIDs) {
-                mRequestQueue.addRequest(Request.newEnableNotificationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+                BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+                if (characteristic == null) {
+                    for (LeListener leListener : mListenerList) {
+                        if (leListener instanceof OnLeNotificationListener) {
+                            ((OnLeNotificationListener) leListener).onFailed(
+                                    new BleException(233, BleException.NOTIFICATION,
+                                            "can not find characteristic form given characteristic uuid : " + characteristicUUID +
+                                                    ", where in given service uuid : " + serviceUUID));
+                        }
+                    }
+                } else {
+                    mRequestQueue.addRequest(Request.newEnableNotificationsRequest(enable, characteristic));
+                }
+            }
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeNotificationListener) {
+                    ((OnLeNotificationListener) leListener).onFailed(
+                            new BleException(233, BleException.NOTIFICATION,
+                                    "can not find service form given service uuid : " + serviceUUID.toString()
+                            ));
+                }
             }
         }
     }
@@ -454,54 +540,194 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     private boolean enableIndication(boolean enable, BluetoothGattCharacteristic characteristic) {
         final BluetoothGatt gatt = mBluetoothGatt;
-        if (gatt == null || characteristic == null) {
+        if (gatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered."));
+                }
+            }
+            return false;
+        }
+        if (characteristic == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "characteristic uuid is null."));
+                }
+            }
             return false;
         }
         final int properties = characteristic.getProperties();
         if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) == 0) {
-            Log.e(TAG, "uuid:" + characteristic.getUuid() + ", does not support indication");
+            BleLogger.e(enableLogger, TAG, "uuid:" + characteristic.getUuid() + ", does not support indication");
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "characteristic uuid : " + characteristic.getUuid() + ", does not support indication."));
+                }
+            }
             return false;
         }
         gatt.setCharacteristicNotification(characteristic, enable);
-        Log.d(TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
+        BleLogger.d(enableLogger, TAG, "setCharacteristicNotification uuid:" + characteristic.getUuid() + " ," + enable);
         final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
         if (descriptor != null) {
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-            Log.d(TAG, "writeDescriptor(indication), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+            BleLogger.d(enableLogger, TAG, "writeDescriptor(indication), " + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
             return gatt.writeDescriptor(descriptor);
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "characteristic uuid : " + characteristic.getUuid() + ", does not contain descriptor."));
+                }
+            }
+            return false;
         }
-        return false;
     }
 
     void enableIndicationQueue(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        if (mBluetoothGatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered.")
+                    );
+                }
+            }
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service != null) {
             for (UUID characteristicUUID : characteristicUUIDs) {
-                mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+                BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+                if (characteristic == null) {
+                    for (LeListener leListener : mListenerList) {
+                        if (leListener instanceof OnLeIndicationListener) {
+                            ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "can not find characteristic form given characteristic uuid : " + characteristicUUID +
+                                            ", where in given service uuid : " + serviceUUID));
+                        }
+                    }
+                } else {
+                    mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, service.getCharacteristic(characteristicUUID)));
+                }
+            }
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeIndicationListener) {
+                    ((OnLeIndicationListener) leListener).onFailed(
+                            new BleException(233, BleException.INDICATION,
+                                    "can not find service form given service uuid : " + serviceUUID.toString()
+                            )
+                    );
+                }
             }
         }
     }
 
     void writeCharacteristicQueue(byte[] bytes, UUID serviceUUID, UUID characteristicUUID) {
-        if (mBluetoothGatt == null || serviceUUID == null || characteristicUUID == null) {
-            Log.d(TAG, "the bluetooth gatt or serviceUUID or characteristicUUID is null. ");
+        if (mBluetoothGatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
+                                    "bluetoothGatt is null. check connect status and onServicesDiscovered.")
+                    );
+                }
+            }
+            return;
+        }
+        if (serviceUUID == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC, "service uuid is null")
+                    );
+                }
+            }
+            return;
+        }
+        if (characteristicUUID == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC, "characteristic uuid is null")
+                    );
+                }
+            }
             return;
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service != null) {
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
-            mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
+            if (characteristic == null) {
+                for (LeListener leListener : mListenerList) {
+                    if (leListener instanceof OnLeWriteCharacteristicListener) {
+                        ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                                new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
+                                        "can not find characteristic form given characteristic uuid : " + characteristicUUID +
+                                                ", where in given service uuid : " + serviceUUID));
+                    }
+                }
+            } else {
+                mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
+            }
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
+                                    "can not find service from given service uuid : " + serviceUUID.toString())
+                    );
+                }
+            }
         }
     }
 
     private boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
         final BluetoothGatt gatt = mBluetoothGatt;
-        if (gatt == null || characteristic == null)
+        if (gatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered.")
+                    );
+                }
+            }
             return false;
+        }
+        if (characteristic == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC, "characteristic uuid is null.")
+                    );
+                }
+            }
+            return false;
+        }
         // Check characteristic property
         final int properties = characteristic.getProperties();
-        if ((properties & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) == 0)
+        if ((properties & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) == 0) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeWriteCharacteristicListener) {
+                    ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                            new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
+                                    "characteristic : " + characteristic.toString() + ", property not support write.")
+                    );
+                }
+            }
             return false;
+        }
         return gatt.writeCharacteristic(characteristic);
     }
 
@@ -510,21 +736,81 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     }
 
     void readCharacteristicQueue(UUID serviceUUID, UUID characteristicUUID) {
+        if (mBluetoothGatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeReadCharacteristicListener) {
+                    ((OnLeReadCharacteristicListener) leListener).onFailure(
+                            new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered.")
+                    );
+                }
+            }
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service != null) {
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
-            mRequestQueue.addRequest(Request.newReadRequest(characteristic));
+            if (characteristic == null) {
+                for (LeListener leListener : mListenerList) {
+                    if (leListener instanceof OnLeReadCharacteristicListener) {
+                        ((OnLeReadCharacteristicListener) leListener).onFailure(
+                                new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                        "can not find characteristic form given characteristic uuid : " + characteristicUUID +
+                                                ", where in given service uuid : " + serviceUUID));
+                    }
+                }
+            } else {
+                mRequestQueue.addRequest(Request.newReadRequest(characteristic));
+            }
+        } else {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeReadCharacteristicListener) {
+                    ((OnLeReadCharacteristicListener) leListener).onFailure(
+                            new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                    "can not find service form given service uuid : " + serviceUUID.toString())
+                    );
+                }
+            }
         }
     }
 
     private boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
         final BluetoothGatt gatt = mBluetoothGatt;
-        if (gatt == null || characteristic == null)
+        if (gatt == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeReadCharacteristicListener) {
+                    ((OnLeReadCharacteristicListener) leListener).onFailure(
+                            new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                    "BluetoothGatt object is null. check connect status and onServicesDiscovered.")
+                    );
+                }
+            }
             return false;
+        }
+        if (characteristic == null) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeReadCharacteristicListener) {
+                    ((OnLeReadCharacteristicListener) leListener).onFailure(
+                            new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                    "characteristic uuid is null.")
+                    );
+                }
+            }
+            return false;
+        }
         // Check characteristic property
         final int properties = characteristic.getProperties();
-        if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0)
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
+            for (LeListener leListener : mListenerList) {
+                if (leListener instanceof OnLeReadCharacteristicListener) {
+                    ((OnLeReadCharacteristicListener) leListener).onFailure(
+                            new ReadBleException(233, BleException.READ_CHARACTERISTIC,
+                                    "characteristic : " + characteristic.toString() + ", property not support read.")
+                    );
+                }
+            }
             return false;
+        }
         return gatt.readCharacteristic(characteristic);
     }
 
@@ -575,6 +861,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             mBluetoothGatt.disconnect();
             mConnected = false;
             mServiceDiscovered = false;
+            cancelReadRssiTimerTask();
         }
     }
 
@@ -615,10 +902,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     private BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
         @Override
-        public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
+        public void onConnectionStateChange(final BluetoothGatt gatt, final int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d(TAG, "device connect success!");
+                BleLogger.d(enableLogger, TAG, "device connect success!");
                 mConnected = true;
                 if (isStopScanAfterConnected) {
                     stopScan();
@@ -656,7 +943,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 }
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d(TAG, "device disconnect.");
+                BleLogger.d(enableLogger, TAG, "device disconnect.");
                 mConnected = false;
                 mServiceDiscovered = false;
 
@@ -673,6 +960,19 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                         }
                     }
                 });
+            } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (LeListener leListener : mListenerList) {
+                            if (leListener instanceof OnLeConnectListener) {
+                                ((OnLeConnectListener) leListener).onDeviceConnectFail(
+                                        new ConnBleException(status, BleException.CONNECT, "Error on connection state change.")
+                                );
+                            }
+                        }
+                    }
+                });
             }
         }
 
@@ -681,7 +981,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             super.onServicesDiscovered(gatt, status);
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "success with find services discovered .");
+                BleLogger.d(enableLogger, TAG, "success with find services discovered .");
                 mServiceDiscovered = true;
 
                 readConnectionParameters();
@@ -701,7 +1001,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 });
 
             } else {
-                Log.d(TAG, "failure find services discovered.");
+                BleLogger.d(enableLogger, TAG, "failure find services discovered.");
                 mServiceDiscovered = false;
             }
         }
@@ -748,11 +1048,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     public void run() {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeReadCharacteristicListener) {
-                                ((OnLeReadCharacteristicListener) leListener).onFailure("Phone has lost bonding information", status);
+                                ((OnLeReadCharacteristicListener) leListener).onFailure(
+                                        new ReadBleException(status, BleException.READ_CHARACTERISTIC, "Phone has lost bonding information."));
                             }
                         }
                         if (mOnLeReadCharacteristicListener != null) {
-                            mOnLeReadCharacteristicListener.onFailure("Phone has lost bonding information", status);
+                            mOnLeReadCharacteristicListener.onFailure(
+                                    new ReadBleException(status, BleException.READ_CHARACTERISTIC, "Phone has lost bonding information."));
                         }
                     }
                 });
@@ -764,11 +1066,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     public void run() {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeReadCharacteristicListener) {
-                                ((OnLeReadCharacteristicListener) leListener).onFailure("Error on reading characteristic", status);
+                                ((OnLeReadCharacteristicListener) leListener).onFailure(
+                                        new ReadBleException(status, BleException.READ_CHARACTERISTIC, "Error on reading characteristic."));
                             }
                         }
                         if (mOnLeReadCharacteristicListener != null) {
-                            mOnLeReadCharacteristicListener.onFailure("Error on reading characteristic", status);
+                            mOnLeReadCharacteristicListener.onFailure(
+                                    new ReadBleException(status, BleException.READ_CHARACTERISTIC, "Error on reading characteristic."));
                         }
                     }
                 });
@@ -804,11 +1108,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     public void run() {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeWriteCharacteristicListener) {
-                                ((OnLeWriteCharacteristicListener) leListener).onFailed("Phone has lost of bonding information. ", status);
+                                ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                                        new WriteBleException(status, BleException.WRITE_CHARACTERISTIC, "Phone has lost of bonding information."));
                             }
                         }
                         if (mOnLeWriteCharacteristicListener != null) {
-                            mOnLeWriteCharacteristicListener.onFailed("Phone has lost of bonding information. ", status);
+                            mOnLeWriteCharacteristicListener.onFailed(
+                                    new WriteBleException(status, BleException.WRITE_CHARACTERISTIC, "Phone has lost of bonding information."));
                         }
                     }
                 });
@@ -820,11 +1126,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     public void run() {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeWriteCharacteristicListener) {
-                                ((OnLeWriteCharacteristicListener) leListener).onFailed("Error on reading characteristic.", status);
+                                ((OnLeWriteCharacteristicListener) leListener).onFailed(
+                                        new WriteBleException(status, BleException.WRITE_CHARACTERISTIC, "Error on reading characteristic."));
                             }
                         }
                         if (mOnLeWriteCharacteristicListener != null) {
-                            mOnLeWriteCharacteristicListener.onFailed("Error on reading characteristic. ", status);
+                            mOnLeWriteCharacteristicListener.onFailed(
+                                    new WriteBleException(status, BleException.WRITE_CHARACTERISTIC, "Error on reading characteristic."));
                         }
                     }
                 });

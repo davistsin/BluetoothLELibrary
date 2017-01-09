@@ -33,8 +33,8 @@ import java.util.UUID;
 
 public class ConnParameters implements Parcelable {
 
-    private UUID mUUID;
-    private String mProperties;
+    private UUID mUUID = UUID.fromString("00002A04-0000-1000-8000-00805f9b34fb");
+    private String mProperties = "";
     private double connIntervalMin;
     private double connIntervalMax;
     private int slaveLatency;

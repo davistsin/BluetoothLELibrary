@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Qin Dachang
+ * Copyright (c) 2017, Qin Dachang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -22,21 +22,58 @@
 
 package com.qindachang.bluetoothle;
 
-import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
-import com.qindachang.bluetoothle.exception.ScanBleException;
-import com.qindachang.bluetoothle.scanner.ScanRecord;
-import com.qindachang.bluetoothle.scanner.ScanResult;
+/**
+ * Created on 2017/1/9.
+ *
+ * @author Qin DaChang
+ * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
+ */
 
-import java.util.List;
+/* package */ class BleLogger {
 
+    public static void v(boolean enable, final String tag, final String text) {
+        if (enable)
+            Log.v(tag, text);
+    }
 
-public abstract class OnLeScanListener extends LeListener {
-    public abstract void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord);
+    public static void d(boolean enable, final String tag, final String text) {
+        if (enable) {
+            Log.d(tag, text);
+        }
+    }
 
-    public abstract void onBatchScanResults(List<ScanResult> results);
+    public static void i(boolean enable, final String tag, final String text) {
+        if (enable)
+            Log.i(tag, text);
+    }
 
-    public abstract void onScanCompleted();
+    public static void w(boolean enable, final String tag, final String text) {
+        if (enable) {
+            Log.w(tag, text);
+        }
+    }
 
-    public abstract void onScanFailed(ScanBleException e);
+    public static void e(boolean enable, final String tag, final String text) {
+        if (enable)
+            Log.e(tag, text);
+    }
+
+    public static void e(boolean enable, final String tag, final String text, final Throwable e) {
+        if (enable)
+            Log.e(tag, text, e);
+    }
+
+    public static void wtf(boolean enable, final String tag, final String text) {
+        if (enable) {
+            Log.wtf(tag, text);
+        }
+    }
+
+    public static void wtf(boolean enable, final String tag, final String text, final Throwable e) {
+        if (enable) {
+            Log.wtf(tag, text, e);
+        }
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Qin Dachang
+ * Copyright (c) 2017, Qin Dachang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -20,66 +20,48 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.qindachang.bluetoothle;
+package com.qindachang.bluetoothle.exception;
+
 
 /**
- * Created on 2016/12/13.
+ * Created on 2017/1/9.
  *
  * @author Qin DaChang
  * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
  */
 
-public final class BluetoothConfig {
+public class ScanBleException extends BleException {
 
-    public static final int AUTO = -1;
-
-    private int queueDelayTime;
-    private boolean enableQueueDelay;
-
-    private boolean enableLogger;
-
-    private BluetoothConfig(Builder builder) {
-        queueDelayTime = builder.queueDelayTime;
-        enableQueueDelay = builder.enableQueueDelay;
-        enableLogger = builder.enableLogger;
+    public ScanBleException(int status, int type) {
+        this(status, type, "");
+        String detailMessage;
+        if (status == 1) {
+            detailMessage = "Fails to start scan as BLE scan with the same settings is already started by the app.";
+        } else if (status == 2) {
+            detailMessage = "Fails to start scan as app cannot be registered.";
+        } else if (status == 3) {
+            detailMessage = "Fails to start scan due an internal error";
+        } else if (status == 4) {
+            detailMessage = "Fails to start power optimized scan as this feature is not supported.";
+        } else if (status == 5) {
+            detailMessage = "Fails to start scan as it is out of hardware resources.";
+        } else {
+            detailMessage = "I don't know..";
+        }
+        setDetailMessage(detailMessage);
     }
 
-    int getQueueDelayTime() {
-        return queueDelayTime;
+    public ScanBleException(int status, int type, String detailMessage) {
+        super(status, type, detailMessage);
     }
 
-    boolean getEnableQueueDelay() {
-        return enableQueueDelay;
-    }
-
-    boolean getEnableLogger() {
-        return enableLogger;
-    }
-
-    public static class Builder {
-        private int queueDelayTime;
-        private boolean enableQueueDelay;
-
-        private boolean enableLogger;
-
-        public Builder setQueueIntervalTime(int millisecond) {
-            this.queueDelayTime = millisecond;
-            this.enableQueueDelay = true;
-            return this;
-        }
-
-        public Builder enableQueueInterval(boolean enable) {
-            this.enableQueueDelay = enable;
-            return this;
-        }
-
-        public Builder enableLogger(boolean enableLogger) {
-            this.enableLogger = enableLogger;
-            return this;
-        }
-
-        public BluetoothConfig build() {
-            return new BluetoothConfig(this);
-        }
+    @Override
+    public String toString() {
+        return "BleException(BLE) : " + "\n" +
+                "{ " + "\n" +
+                "errorCode = " + getStatus() + ",\n" +
+                "type = " + getTypeArr()[getType()] + ",\n" +
+                "detail = " + getDetailMessage() + "\n" +
+                "}";
     }
 }

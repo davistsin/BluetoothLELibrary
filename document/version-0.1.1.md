@@ -78,7 +78,7 @@
                     }
 
                     @Override
-                    public void onScanFailed(int code) {
+                    public void onScanFailed(int status) {
                         mStringBuilder.append("扫描错误\n");
                         tv_text.setText(mStringBuilder.toString());
                     }

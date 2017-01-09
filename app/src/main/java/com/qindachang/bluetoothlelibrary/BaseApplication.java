@@ -17,6 +17,7 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         BluetoothConfig config = new BluetoothConfig.Builder()
+                .enableLogger(true)
                 .enableQueueInterval(true)
                 .setQueueIntervalTime(BluetoothConfig.AUTO)//设置队列间隔时间为自动
                 .build();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Qin Dachang
+ * Copyright (c) 2017, Qin Dachang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -20,23 +20,17 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.qindachang.bluetoothle;
+package com.qindachang.bluetoothle.exception;
 
-import android.bluetooth.BluetoothDevice;
+/**
+ * Created on 2017/1/9.
+ *
+ * @author Qin DaChang
+ * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
+ */
 
-import com.qindachang.bluetoothle.exception.ScanBleException;
-import com.qindachang.bluetoothle.scanner.ScanRecord;
-import com.qindachang.bluetoothle.scanner.ScanResult;
-
-import java.util.List;
-
-
-public abstract class OnLeScanListener extends LeListener {
-    public abstract void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord);
-
-    public abstract void onBatchScanResults(List<ScanResult> results);
-
-    public abstract void onScanCompleted();
-
-    public abstract void onScanFailed(ScanBleException e);
+public class WriteBleException extends BleException {
+    public WriteBleException(int status, int type, String detailMessage) {
+        super(status, type, detailMessage);
+    }
 }
