@@ -2,7 +2,7 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.6.2-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.5.6-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 [下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/bluetooth-LE-0.6.0.jar "下载jar文件")
@@ -34,7 +34,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.6.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.5.6'
 
 **权限：**
 
@@ -152,8 +152,8 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
                     }
 
                     @Override
-                    public void onScanFailed(ScanBleException e) {
-                        mStringBuilder.append("扫描错误\n").append(e.toString());;
+                    public void onScanFailed(int status) {
+                        mStringBuilder.append("扫描错误\n");
                         tv_text.setText(mStringBuilder.toString());
                     }
                 });
@@ -220,8 +220,8 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
          }
 
          @Override
-         public void onDeviceConnectFail(ConnBleException e) {
-                    mStringBuilder.append("连接失败").append(e.toString());
+         public void onDeviceConnectFail() {
+                    mStringBuilder.append("连接失败");
                     mStringBuilder.append("\n");
                     tv_text.setText(mStringBuilder.toString());
                 }
@@ -259,7 +259,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
             }
 
             @Override
-            public void onFailed(WriteBleException e) {
+            public void onFailed(String msg, int status) {
 
             }
         });
@@ -288,12 +288,6 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
             }
 
-            @Override
-            public void onFailed(BleException e) {
-                mStringBuilder.append("开启通知失败:\n")
-                        .append(e.toString());
-                mTvText.setText(mStringBuilder.toString());
-            }
     });
 
 **七、Indication类型通知**
@@ -315,12 +309,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
             public void onSuccess(BluetoothGattCharacteristic characteristic) {
                 Log.d("debug", "收到通知：" + Arrays.toString(characteristic.getValue()));
             }
-            @Override
-            public void onFailed(BleException e) {
-                mStringBuilder.append("开启通知失败:\n")
-                        .append(e.toString());
-                mTvText.setText(mStringBuilder.toString());
-            }
+
     });
 
 
@@ -342,7 +331,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
             }
 
             @Override
-            public void onFailure(ReadBleException e) {
+            public void onFailure(String info, int status) {
 
             }
     );
@@ -453,10 +442,6 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 10. [Version 0.5.2]
 
    过滤扫描可以根据多个uuid等
-
-11. [Version 0.6.2]
-
-   增加:异常处理，避免产生崩溃
 
 ###Thanks
 
