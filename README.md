@@ -5,6 +5,7 @@
 ![Release Version](https://img.shields.io/badge/release-0.6.0-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
+[下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/bluetooth-LE-0.6.0.jar "下载jar文件")
 
 低功耗蓝牙库。**优势**：
 
@@ -34,7 +35,6 @@
 添加以下代码在你的APP级别 app build.gradle:
 
 	compile 'com.qindachang:BluetoothLELibrary:0.6.0'
-
 
 **权限：**
 
