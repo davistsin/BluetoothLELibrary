@@ -72,6 +72,10 @@ public class BluetoothLe {
         mBleManager.setConfig(config);
     }
 
+    public boolean isSupportBluetooth() {
+        return mBleManager.isSupportBluetooth();
+    }
+
     public boolean isBluetoothOpen() {
         return mBleManager.isBluetoothOpen();
     }

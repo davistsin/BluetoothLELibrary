@@ -137,6 +137,11 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         enableLogger = config.getEnableLogger();
     }
 
+    boolean isSupportBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return bluetoothAdapter != null;
+    }
+
     boolean isBluetoothOpen() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         return bluetoothAdapter.isEnabled();
@@ -451,6 +456,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "BluetoothGatt object is null. check connect status and onServicesDiscovered."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         if (characteristic == null) {
@@ -461,6 +467,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid is null."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         final int properties = characteristic.getProperties();
@@ -473,6 +480,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid : " + characteristic.getUuid() + ", does not support notification"));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         gatt.setCharacteristicNotification(characteristic, enable);
@@ -490,6 +498,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid : " + characteristic.getUuid() + ", does not contain descriptor."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
     }
@@ -527,8 +536,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 if (leListener instanceof OnLeNotificationListener) {
                     ((OnLeNotificationListener) leListener).onFailed(
                             new BleException(233, BleException.NOTIFICATION,
-                                    "can not find service form given service uuid : " + serviceUUID.toString()
-                            ));
+                                    "can not find service form given service uuid : " + serviceUUID.toString()));
                 }
             }
         }
@@ -548,6 +556,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "BluetoothGatt object is null. check connect status and onServicesDiscovered."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         if (characteristic == null) {
@@ -558,6 +567,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid is null."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         final int properties = characteristic.getProperties();
@@ -570,6 +580,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid : " + characteristic.getUuid() + ", does not support indication."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         gatt.setCharacteristicNotification(characteristic, enable);
@@ -587,6 +598,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                                     "characteristic uuid : " + characteristic.getUuid() + ", does not contain descriptor."));
                 }
             }
+            mRequestQueue.next();
             return false;
         }
     }
@@ -611,9 +623,9 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     for (LeListener leListener : mListenerList) {
                         if (leListener instanceof OnLeIndicationListener) {
                             ((OnLeIndicationListener) leListener).onFailed(
-                            new BleException(233, BleException.INDICATION,
-                                    "can not find characteristic form given characteristic uuid : " + characteristicUUID +
-                                            ", where in given service uuid : " + serviceUUID));
+                                    new BleException(233, BleException.INDICATION,
+                                            "can not find characteristic form given characteristic uuid : " + characteristicUUID +
+                                                    ", where in given service uuid : " + serviceUUID));
                         }
                     }
                 } else {
@@ -703,6 +715,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         if (characteristic == null) {
@@ -713,6 +726,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         // Check characteristic property
@@ -722,10 +736,11 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 if (leListener instanceof OnLeWriteCharacteristicListener) {
                     ((OnLeWriteCharacteristicListener) leListener).onFailed(
                             new WriteBleException(233, BleException.WRITE_CHARACTERISTIC,
-                                    "characteristic : " + characteristic.toString() + ", property not support write.")
+                                    "characteristic : " + characteristic.getUuid() + ", property not support write.")
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         return gatt.writeCharacteristic(characteristic);
@@ -767,7 +782,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 if (leListener instanceof OnLeReadCharacteristicListener) {
                     ((OnLeReadCharacteristicListener) leListener).onFailure(
                             new ReadBleException(233, BleException.READ_CHARACTERISTIC,
-                                    "can not find service form given service uuid : " + serviceUUID.toString())
+                                    "can not find service form given service uuid : " + serviceUUID)
                     );
                 }
             }
@@ -785,6 +800,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         if (characteristic == null) {
@@ -796,6 +812,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         // Check characteristic property
@@ -809,6 +826,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     );
                 }
             }
+            mRequestQueue.next();
             return false;
         }
         return gatt.readCharacteristic(characteristic);
@@ -862,6 +880,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             mConnected = false;
             mServiceDiscovered = false;
             cancelReadRssiTimerTask();
+            mBluetoothGatt = null;
         }
     }
 

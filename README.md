@@ -2,10 +2,10 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.6.2-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.6.3-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
-[下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/bluetooth-LE-0.6.0.jar "下载jar文件")
+[下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/ "下载jar文件")
 
 低功耗蓝牙库。**优势**：
 
@@ -34,7 +34,7 @@
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.6.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.6.3'
 
 **权限：**
 
@@ -48,6 +48,10 @@
 
 
 **前戏**
+
+是否支持蓝牙
+
+    mBluetoothLe.isSupportBluetooth();
 
 判断蓝牙是否打开
 
@@ -399,8 +403,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
     mBluetoothLe.cancelAllTag();
 
 ##仍在补充
-1. 用库不star，菊花万人踏
-2. 一连多台蓝牙设备
+1. 一连多台蓝牙设备
 
 ##了解更多
 

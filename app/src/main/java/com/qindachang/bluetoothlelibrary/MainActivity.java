@@ -41,11 +41,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 以下uuid仅作为作者本人实际硬件的使用，请你更换为你所使用的uuid，如果不明白，可以去询问你的硬件工程师
      **/
-    private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
-    private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
-    private static final String STEP_NOTIFICATION_UUID = "0000fff3-0000-1000-8000-00805f9b34fb";
-    private static final String WRITE_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
-    private static final String READ_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
+    private static final String SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca0e";
+    private static final String HEART_NOTIFICATION_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca0e";
+    private static final String STEP_NOTIFICATION_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca0e";
+    private static final String WRITE_UUID = "6e400006-b5a3-f393-e0a9-e50e24dcca0e";
+    private static final String READ_UUID = "6e400007-b5a3-f393-e0a9-e50e24dcca0e";
 
     private static final byte[] OPEN_HEART_RATE_NOTIFY = {0x01, 0x01};
     private static final byte[] OPEN_STEP_NOTIFY = {0x06, 0x01};
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //               .setScanWithDeviceAddress("C2:53:32:7C:00:30")
                 //               .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})//设置根据服务uuid过滤扫描
 
-//                 .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
+                 .setScanWithDeviceName("STEP")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
                 .startScan(this, new OnLeScanListener() {
                     @Override
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void closeAllNotification() {
-        mBluetoothLe.enableNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
+        mBluetoothLe.enableNotification(false, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID,STEP_NOTIFICATION_UUID});
     }
 
     private void sendMsg(byte[] bytes) {
