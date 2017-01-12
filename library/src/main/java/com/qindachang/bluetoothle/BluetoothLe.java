@@ -84,6 +84,10 @@ public class BluetoothLe {
         mBleManager.enableBluetooth(activity);
     }
 
+    public void enableBluetooth(Activity activity, int requestCode) {
+        mBleManager.enableBluetooth(activity, requestCode);
+    }
+
     public void disableBluetooth() {
         mBleManager.disableBluetooth();
     }

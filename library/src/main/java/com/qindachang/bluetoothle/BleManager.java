@@ -131,7 +131,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         enableLogger = config.getEnableLogger();
     }
 
-    void setConfig(BluetoothConfig config) {
+    public void setConfig(BluetoothConfig config) {
         queueDelayTime = config.getQueueDelayTime();
         enableQueueDelay = config.getEnableQueueDelay();
         enableLogger = config.getEnableLogger();
@@ -160,6 +160,23 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             }
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             activity.startActivity(intent);
+            return true;
+        }
+    }
+
+    boolean enableBluetooth(Activity activity,int requestCode) {
+        synchronized (BleManager.class) {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null) {
+                BleLogger.e(enableLogger, TAG, "false. your device does not support bluetooth. ");
+                return false;
+            }
+            if (bluetoothAdapter.isEnabled()) {
+                BleLogger.d(enableLogger, TAG, "false. your device has been turn on bluetooth.");
+                return false;
+            }
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            activity.startActivityForResult(intent, requestCode);
             return true;
         }
     }
