@@ -80,10 +80,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
     private boolean isScanning;
     private boolean mConnected;
     private boolean mServiceDiscovered;
-    private boolean mRetryConnectEnable;
-    private int mRetryConnectCount = 1;
-    private int connectTimeoutMillis;
-    private int serviceTimeoutMillis;
 
     private double connIntervalMin;
     private double connIntervalMax;
@@ -354,21 +350,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         }
     };
 
-    void setRetryConnectEnable(boolean retryConnectEnable) {
-        mRetryConnectEnable = retryConnectEnable;
-    }
-
-    void setConnectTimeoutMillis(int connectTimeoutMillis) {
-        this.connectTimeoutMillis = connectTimeoutMillis;
-    }
-
-    void setServiceTimeoutMillis(int serviceTimeoutMillis) {
-        this.serviceTimeoutMillis = serviceTimeoutMillis;
-    }
-
-    void setRetryConnectCount(int retryConnectCount) {
-        mRetryConnectCount = retryConnectCount;
-    }
 
     boolean connect(boolean autoConnect, final BluetoothDevice device) {
         mAutoConnect = autoConnect;
@@ -420,8 +401,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             mOnLeConnectListener.onDeviceConnecting();
         }
 
-        checkConnected();
-
         return true;
     }
 
@@ -434,21 +413,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     BluetoothGatt getBluetoothGatt() {
         return mBluetoothGatt;
-    }
-
-    private void checkConnected() {
-        if (mRetryConnectEnable && mRetryConnectCount > 0 && connectTimeoutMillis > 0) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    boolean connected = getConnected();
-                    if (!connected) {
-                        connect(mAutoConnect, mBluetoothDevice);
-                        mRetryConnectCount = mRetryConnectCount - 1;
-                    }
-                }
-            }, connectTimeoutMillis);
-        }
     }
 
     boolean getConnected() {
@@ -893,11 +857,12 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     void disconnect() {
         if (mConnected && mBluetoothGatt != null) {
+            cancelReadRssiTimerTask();
             mBluetoothGatt.disconnect();
             mConnected = false;
             mServiceDiscovered = false;
-            cancelReadRssiTimerTask();
             mBluetoothGatt = null;
+            clearQueue();
         }
     }
 
@@ -907,20 +872,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             mBluetoothGatt = null;
             mConnected = false;
             mServiceDiscovered = false;
-        }
-    }
-
-    private void checkServiceDiscover() {
-        if (mRetryConnectEnable && mRetryConnectCount > 0 && serviceTimeoutMillis > 0) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (!mServiceDiscovered) {
-                        connect(mAutoConnect, mBluetoothDevice);
-                        mRetryConnectCount -= 1;
-                    }
-                }
-            }, serviceTimeoutMillis);
+            clearQueue();
         }
     }
 
@@ -967,7 +919,6 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                         if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
                             if (mBluetoothGatt != null) {
                                 mBluetoothGatt.discoverServices();
-                                checkServiceDiscover();
                             }
                         }
                     }

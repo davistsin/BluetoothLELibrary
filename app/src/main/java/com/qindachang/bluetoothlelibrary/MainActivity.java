@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //               .setScanWithDeviceAddress("C2:53:32:7C:00:30")
                 //               .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})//设置根据服务uuid过滤扫描
 
-                 .setScanWithDeviceName("STEP")//设置根据设备名称过滤扫描
+                 .setScanWithDeviceName("SmartBra")//设置根据设备名称过滤扫描
                 .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
                 .startScan(this, new OnLeScanListener() {
                     @Override
@@ -282,11 +282,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //有些手机的连接过程比较长，经测试，小米手机连接所花时间最多，有时会在15s左右
     //发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
     private void connect() {
-        mBluetoothLe.setRetryConnectEnable(false)//设置尝试重新连接
-//                .setRetryConnectCount(3)//重试连接次数
-//                .setConnectTimeOut(5000)//连接超时，单位毫秒
-//                .setServiceDiscoverTimeOut(5000)//发现服务超时，单位毫秒
-                .startConnect(false, mBluetoothDevice);
+        mBluetoothLe.startConnect(false, mBluetoothDevice);
     }
 
     private void disconnect() {
