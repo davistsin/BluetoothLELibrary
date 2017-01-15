@@ -878,6 +878,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
     private void readConnectionParameters() {
         if (mBluetoothGatt == null) {
+            BleLogger.e(enableLogger, TAG, "The BluetoothGatt is null, check connection ? ");
             return;
         }
         readCharacteristicQueue(SERVICE, PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
@@ -933,7 +934,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 BleLogger.d(enableLogger, TAG, "device disconnect.");
                 mConnected = false;
                 mServiceDiscovered = false;
-
+                clearQueue();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -948,6 +949,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     }
                 });
             } else {
+                clearQueue();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
