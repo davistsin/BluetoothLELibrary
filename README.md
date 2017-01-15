@@ -268,6 +268,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 ###监听
 
 ```java
+//监听扫描
 //Every Bluetooth-LE commands status will be callback in here. Flowing listener:
 mBleManager.setOnScanListener(TAG, new OnLeScanListener() {
     @Override
@@ -295,12 +296,12 @@ mBleManager.setOnScanListener(TAG, new OnLeScanListener() {
 更多的类似于
 
 ```java
-mBleManager.setOnConnectListener(...)
-mBleManager.setOnNotificationListener(...)
-mBleManager.setOnIndicateListener(...)
-mBleManager.setOnWriteCharacteristicListener(...)
-mBleManager.setOnReadCharacteristicListener(...)
-mBleManager.setOnReadRssiListener(...)
+mBleManager.setOnConnectListener(...)//监听连接
+mBleManager.setOnNotificationListener(...)//监听通知
+mBleManager.setOnIndicateListener(...)//监听通知
+mBleManager.setOnWriteCharacteristicListener(...)//监听写
+mBleManager.setOnReadCharacteristicListener(...)//监听读
+mBleManager.setOnReadRssiListener(...)//监听信号强度
 ```
 ###其它
 
@@ -328,7 +329,7 @@ mBleManager.setOnReadRssiListener(...)
 
 	mBluetoothLe.destroy();
 
-如果你使用了tag，使用: （它的好处是你可以在多个界面产生多个相同的回调）
+如果你使用了tag标签的监听，使用: （它的好处是你可以在多个界面产生多个相同的回调）
 
     mBluetoothLe.destroy(TAG);
 
