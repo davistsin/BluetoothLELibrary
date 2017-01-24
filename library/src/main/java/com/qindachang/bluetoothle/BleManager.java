@@ -893,9 +893,12 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         @Override
         public void onConnectionStateChange(final BluetoothGatt gatt, final int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
+            //TODO  Is should clear queue in here or just in STATE_CONNECTED and else.
+            clearQueue();
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 BleLogger.d(enableLogger, TAG, "device connect success!");
                 mConnected = true;
+
                 if (isStopScanAfterConnected) {
                     stopScan();
                 }
@@ -934,7 +937,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                 BleLogger.d(enableLogger, TAG, "device disconnect.");
                 mConnected = false;
                 mServiceDiscovered = false;
-                clearQueue();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -949,7 +952,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     }
                 });
             } else {
-                clearQueue();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
