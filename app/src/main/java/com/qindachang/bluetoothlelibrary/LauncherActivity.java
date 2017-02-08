@@ -5,8 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.qindachang.bluetoothlelibrary.ui.Main2Activity;
-import com.qindachang.bluetoothlelibrary.ui.MainActivity;
+import com.qindachang.bluetoothlelibrary.ui.demo.Main2Activity;
+import com.qindachang.bluetoothlelibrary.ui.test.MainActivity;
 
 public class LauncherActivity extends AppCompatActivity {
 
