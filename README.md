@@ -39,7 +39,7 @@ demo运行环境 Android Studio 2.2.3
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.7.0'
+	compile 'com.qindachang:BluetoothLELibrary:0.7.1'
 
 **权限：**
 
@@ -348,7 +348,8 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 
 ##了解更多
 
-1. 强烈建议阅读Demo ： [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/MainActivity.java "MainActivity.java") /
+1. 强烈建议阅读Demo ：
+[MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/test/MainActivity.java "MainActivity.java") /
 [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
 
 ###Thanks
