@@ -157,16 +157,6 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
-    public void startScan(@NonNull Object tag, Activity activity, OnLeScanListener onLeScanListener) {
-        onLeScanListener.setTag(tag);
-        mBleManager.addLeListenerList(onLeScanListener);
-        mBleManager.scan(activity, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
-        filterDeviceNameList.clear();
-        filterDeviceAddressList.clear();
-        uFilerServiceUUIDList.clear();
-        scanPeriod = 0;
-    }
-
     public void startScan(Activity activity) {
         mBleManager.scan(activity, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
         filterDeviceNameList.clear();
@@ -175,7 +165,6 @@ public class BluetoothLe {
         scanPeriod = 0;
     }
 
-    @Deprecated
     public void setOnScanListener(OnLeScanListener onLeScanListener) {
         mBleManager.setOnLeScanListener(onLeScanListener);
     }
@@ -222,18 +211,15 @@ public class BluetoothLe {
         mBleManager.connect(autoConnect, bluetoothDevice);
     }
 
-    @Deprecated
     public void startConnect(BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
         startConnect(false, bluetoothDevice, onLeConnectListener);
     }
 
-    @Deprecated
     public void startConnect(boolean autoConnect, BluetoothDevice bluetoothDevice, OnLeConnectListener onLeConnectListener) {
         setOnConnectListener(onLeConnectListener);
         mBleManager.connect(autoConnect, bluetoothDevice);
     }
 
-    @Deprecated
     public void setOnConnectListener(OnLeConnectListener onLeConnectListener) {
         mBleManager.setConnectListener(onLeConnectListener);
     }
@@ -272,7 +258,6 @@ public class BluetoothLe {
         return this;
     }
 
-    @Deprecated
     public void setOnNotificationListener(OnLeNotificationListener onLeNotificationListener) {
         mBleManager.setOnLeNotificationListener(onLeNotificationListener);
     }
@@ -320,18 +305,15 @@ public class BluetoothLe {
         mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
     }
 
-    @Deprecated
     public void readCharacteristic(String serviceUUID, String characteristicUUID, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
         readCharacteristic(UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID), onLeReadCharacteristicListener);
     }
 
-    @Deprecated
     public void readCharacteristic(UUID serviceUUID, UUID characteristicUUID, OnLeReadCharacteristicListener onLeReadCharacteristicListener) {
         mBleManager.readCharacteristicQueue(serviceUUID, characteristicUUID);
         setOnReadCharacteristicListener(onLeReadCharacteristicListener);
     }
 
-    @Deprecated
     public void setOnReadCharacteristicListener(OnLeReadCharacteristicListener onReadCharacteristicListener) {
         mBleManager.setOnLeReadCharacteristicListener(onReadCharacteristicListener);
     }
@@ -349,18 +331,15 @@ public class BluetoothLe {
         mBleManager.writeCharacteristicQueue(bytes, serviceUUID, characteristicUUID);
     }
 
-    @Deprecated
     public void writeDataToCharacteristic(byte[] bytes, String serviceUUID, String characteristicUUID, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         writeDataToCharacteristic(bytes, UUID.fromString(serviceUUID), UUID.fromString(characteristicUUID), onLeWriteCharacteristicListener);
     }
 
-    @Deprecated
     public void writeDataToCharacteristic(byte[] bytes, UUID serviceUUID, UUID characteristicUUID, OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         setOnWriteCharacteristicListener(onLeWriteCharacteristicListener);
         mBleManager.writeCharacteristicQueue(bytes, serviceUUID, characteristicUUID);
     }
 
-    @Deprecated
     public void setOnWriteCharacteristicListener(OnLeWriteCharacteristicListener onLeWriteCharacteristicListener) {
         mBleManager.setWriteCharacteristicListener(onLeWriteCharacteristicListener);
     }
