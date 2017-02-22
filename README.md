@@ -2,7 +2,7 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.7.0-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.7.2-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 [下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/ "下载jar文件")
@@ -39,7 +39,7 @@ demo运行环境 Android Studio 2.2.3
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.7.1'
+	compile 'com.qindachang:BluetoothLELibrary:0.7.2'
 
 **权限：**
 
@@ -351,6 +351,9 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 1. 强烈建议阅读Demo ：
 [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/test/MainActivity.java "MainActivity.java") /
 [activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
+
+2. 如何在多个Activity和Fragment中使用：
+[https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo](https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo "https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo")
 
 ###Thanks
 
