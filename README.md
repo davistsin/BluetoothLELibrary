@@ -14,7 +14,7 @@ demo运行环境 Android Studio 2.2.3
 
 低功耗蓝牙库。**优势**：
 
-1. **适配**到Android5.0和Android6.0的扫描方式（速度极快）。
+1. **适配**到Android5.0和Android6.0、7.0的扫描方式（速度极快）。
 2. 适配小米手机连接蓝牙操作。
 3. 适配三星手机发现服务、开启通知等。
 4. 支持**直接连发数百条**数据，而不用担心消息发不出。自带消息队列（终于可以像iOS一样啦，不用去写延时啦）。
@@ -25,9 +25,10 @@ demo运行环境 Android Studio 2.2.3
 8. 设备信号强度、距离计算回调，可用于防丢器产品。
 
 ###注意点：
-1. Android 6.0扫描蓝牙需要地理位置权限。
-2. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
-3. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
+1. Android 6.0扫描蓝牙需要地理位置权限。 Google动态权限开源库：[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
+2. Android 7.0扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
+3. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
+4. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
 
 ##入门指南
 
@@ -48,7 +49,7 @@ demo运行环境 Android Studio 2.2.3
 
 5.0以上需要
 
-    <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
+    <!-- 只有当你的 targets API 等于或大于 Android 5.0 (API level 21) 才需要此权限 -->
     <uses-feature android:name="android.hardware.location.gps" />
 
 6.0以上设备需要
@@ -100,7 +101,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
             super.onCreate();
             BluetoothConfig config = new BluetoothConfig.Builder()
                     .enableQueueInterval(true)//开启队列定时
-                    .setQueueIntervalTime(150)//设置定时时长（才会发下一条），单位ms
+                    .setQueueIntervalTime(150)//设置定时150ms时长（才会发下一条），单位ms
                     .build();
             BluetoothLe.getDefault().init(this, config);
         }
@@ -112,7 +113,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 ```java
     BluetoothConfig config = new BluetoothConfig.Builder()
             .enableQueueInterval(true)
-            .setQueueIntervalTime(BluetoothConfig.AUTO)
+            .setQueueIntervalTime(BluetoothConfig.AUTO)//发送时间间隔将根据蓝牙硬件自动得出
             .build();
     BluetoothLe.getDefault().init(this, config);
 ```
@@ -305,6 +306,12 @@ mBleManager.setOnWriteCharacteristicListener(...)//监听写
 mBleManager.setOnReadCharacteristicListener(...)//监听读
 mBleManager.setOnReadRssiListener(...)//监听信号强度
 ```
+
+拥有TAG的监听将可以在多个界面中产生回调，这可以帮助你实现多个Activity或Fragment监听蓝牙状态的需求。如不使用TAG的监听，将只有一个回调。
+
+使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy(TAG);
+如不使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy();
+
 ###其它
 
 **清理蓝牙缓存**

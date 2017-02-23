@@ -4,11 +4,13 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qindachang.bluetoothle.BluetoothLe;
 import com.qindachang.bluetoothle.OnLeConnectListener;
@@ -25,7 +27,9 @@ import com.qindachang.bluetoothle.exception.ScanBleException;
 import com.qindachang.bluetoothle.exception.WriteBleException;
 import com.qindachang.bluetoothle.scanner.ScanRecord;
 import com.qindachang.bluetoothle.scanner.ScanResult;
+import com.qindachang.bluetoothlelibrary.ApiLevelHelper;
 import com.qindachang.bluetoothlelibrary.BluetoothUUID;
+import com.qindachang.bluetoothlelibrary.LocationUtils;
 import com.qindachang.bluetoothlelibrary.R;
 
 import java.util.Arrays;
@@ -243,6 +247,12 @@ public class MainActivity extends AppCompatActivity {
                 mBluetoothLe.startConnect(true, mBluetoothDevice);
                 break;
             case R.id.btn_scan:
+                //如果系统版本是7.0以上，则请求打开位置信息
+                if (!LocationUtils.isOpenLocService(this) && ApiLevelHelper.isAtLeast(Build.VERSION_CODES.N)) {
+                    Toast.makeText(this,"您的Android版本在7.0以上，扫描需要打开位置信息。", Toast.LENGTH_LONG).show();
+                    LocationUtils.gotoLocServiceSettings(this);
+                    return;
+                }
                 scan();
                 break;
             case R.id.btn_open_notification:
