@@ -2,7 +2,7 @@
 ![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
 
 ![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.7.2-red.svg)
+![Release Version](https://img.shields.io/badge/release-0.7.3-red.svg)
 
 [English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 [下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/ "下载jar文件")
@@ -42,7 +42,7 @@ demo运行环境 Android Studio 2.2.3
 
 添加以下代码在你的APP级别 app build.gradle:
 
-	compile 'com.qindachang:BluetoothLELibrary:0.7.2'
+	compile 'com.qindachang:BluetoothLELibrary:0.7.3'
 
 **权限：**
 
