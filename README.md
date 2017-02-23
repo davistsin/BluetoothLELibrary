@@ -27,6 +27,8 @@ demo运行环境 Android Studio 2.2.3
 ###注意点：
 1. Android 6.0扫描蓝牙需要地理位置权限。 Google动态权限开源库：[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
 2. Android 7.0扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
+[LocationUtils](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/LocationUtils.java "LocationUtils")
+[ApiLevelHelper](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ApiLevelHelper.java "ApiLevelHelper")
 3. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
 4. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
 
