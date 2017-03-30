@@ -3,10 +3,11 @@ package com.qindachang.bluetoothlelibrary.ui.test;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import com.qindachang.bluetoothle.exception.WriteBleException;
 import com.qindachang.bluetoothle.scanner.ScanRecord;
 import com.qindachang.bluetoothle.scanner.ScanResult;
 import com.qindachang.bluetoothlelibrary.ApiLevelHelper;
+import com.qindachang.bluetoothlelibrary.BaseActivity;
 import com.qindachang.bluetoothlelibrary.BluetoothUUID;
 import com.qindachang.bluetoothlelibrary.LocationUtils;
 import com.qindachang.bluetoothlelibrary.R;
@@ -41,7 +43,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     @BindView(R.id.tv_text)
@@ -247,12 +249,6 @@ public class MainActivity extends AppCompatActivity {
                 mBluetoothLe.startConnect(true, mBluetoothDevice);
                 break;
             case R.id.btn_scan:
-                //如果系统版本是7.0以上，则请求打开位置信息
-                if (!LocationUtils.isOpenLocService(this) && ApiLevelHelper.isAtLeast(Build.VERSION_CODES.N)) {
-                    Toast.makeText(this,"您的Android版本在7.0以上，扫描需要打开位置信息。", Toast.LENGTH_LONG).show();
-                    LocationUtils.gotoLocServiceSettings(this);
-                    return;
-                }
                 scan();
                 break;
             case R.id.btn_open_notification:
@@ -273,8 +269,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scan() {
+        //对于Android 6.0以上的版本，申请地理位置动态权限
+        if (!checkLocationPermission()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("权限需求")
+                    .setMessage("Android 6.0 以上的系统版本，扫描蓝牙需要地理位置权限。请允许。")
+                    .setNeutralButton("取消", null)
+                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            requestLocationPermission();
+                        }
+                    })
+                    .show();
+            return;
+        }
+        //如果系统版本是7.0以上，则请求打开位置信息
+        if (!LocationUtils.isOpenLocService(this) && ApiLevelHelper.isAtLeast(Build.VERSION_CODES.N)) {
+            Toast.makeText(this,"您的Android版本在7.0以上，扫描需要打开位置信息。", Toast.LENGTH_LONG).show();
+            LocationUtils.gotoLocServiceSettings(this);
+            return;
+        }
         mBluetoothLe.setScanPeriod(20000)
-                .setScanWithServiceUUID(BluetoothUUID.SERVICE)
+             //   .setScanWithServiceUUID(BluetoothUUID.SERVICE)
                 .setReportDelay(0)
                 .startScan(this);
     }

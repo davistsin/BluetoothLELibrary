@@ -24,7 +24,8 @@ demo运行环境 Android Studio 2.2.3
 7. 队列定时设置，满足因公司需求蓝牙时间间隔。
 8. 设备信号强度、距离计算回调，可用于防丢器产品。
 
-###注意点：
+### 注意点：
+
 1. Android 6.0扫描蓝牙需要地理位置权限。 Google动态权限开源库：[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
 2. Android 7.0扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
 [LocationUtils](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/LocationUtils.java "LocationUtils")
@@ -32,7 +33,7 @@ demo运行环境 Android Studio 2.2.3
 3. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
 4. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
 
-##入门指南
+## 入门指南
 
 **引入方式**
 
@@ -59,7 +60,7 @@ demo运行环境 Android Studio 2.2.3
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-###代码
+### 代码
 
 **前戏**
 
@@ -270,7 +271,7 @@ such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时�
 
     mBluetoothLe.stopReadRssi();
 
-###监听
+### 监听
 
 ```java
 //监听扫描
@@ -314,7 +315,7 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy(TAG);
 如不使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy();
 
-###其它
+### 其它
 
 **清理蓝牙缓存**
 
@@ -334,7 +335,7 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 
     mBluetoothLe.clearQueue();
 
-###避免内存泄露
+### 避免内存泄露
 
 在Activity生命周期onDestroy() 中使用：
 
@@ -352,10 +353,11 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 
     mBluetoothLe.cancelAllTag();
 
-##仍在补充
+## 仍在补充
+
 1. 一连多台蓝牙设备
 
-##了解更多
+## 了解更多
 
 1. 强烈建议阅读Demo ：
 [MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/test/MainActivity.java "MainActivity.java") /
@@ -364,7 +366,7 @@ mBleManager.setOnReadRssiListener(...)//监听信号强度
 2. 如何在多个Activity和Fragment中使用：
 [https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo](https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo "https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo")
 
-###Thanks
+### Thanks
 
 [NordicSemiconductor](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library "NordicSemiconductor")
 

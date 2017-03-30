@@ -38,6 +38,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -138,11 +139,13 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         return bluetoothAdapter != null;
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     boolean isBluetoothOpen() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         return bluetoothAdapter.isEnabled();
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     boolean enableBluetooth(Activity activity) {
         synchronized (BleManager.class) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -160,6 +163,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     boolean enableBluetooth(Activity activity,int requestCode) {
         synchronized (BleManager.class) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -177,6 +181,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         }
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
     boolean disableBluetooth() {
         synchronized (BleManager.class) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -387,11 +392,12 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
         }
         BleLogger.d(enableLogger, TAG, "create new device connection for BluetoothGatt. ");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback, TRANSPORT_LE);
-        } else {
-            mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback, TRANSPORT_LE);
+//        } else {
+//            mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback);
+//        }
+        mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback);
         for (LeListener leListener : mListenerList) {
             if (leListener instanceof OnLeConnectListener) {
                 ((OnLeConnectListener) leListener).onDeviceConnecting();
@@ -1005,7 +1011,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
                 if (characteristic.getUuid().equals(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID)) {
-                    List<Integer> parameters = Utils.bytes2IntegerList(characteristic.getValue());
+                    List<Integer> parameters = BluetoothUtils.bytes2IntegerList(characteristic.getValue());
                     connIntervalMin = (parameters.get(1) * 16 + parameters.get(0)) * 1.25;
                     connIntervalMax = (parameters.get(3) * 16 + parameters.get(2)) * 1.25;
                     slaveLatency = parameters.get(5) * 16 + parameters.get(4);
@@ -1189,7 +1195,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
                     public void run() {
                         for (LeListener leListener : mListenerList) {
                             if (leListener instanceof OnLeReadRssiListener) {
-                                ((OnLeReadRssiListener) leListener).onSuccess(rssi, Utils.getDistance(rssi));
+                                ((OnLeReadRssiListener) leListener).onSuccess(rssi, BluetoothUtils.getDistance(rssi));
                             }
                         }
                     }

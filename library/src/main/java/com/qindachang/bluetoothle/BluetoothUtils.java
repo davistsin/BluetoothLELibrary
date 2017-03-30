@@ -32,7 +32,7 @@ import java.util.List;
  * @see <a href="https://github.com/qindachang">https://github.com/qindachang</a>
  */
 
-/* package */ class Utils {
+public class BluetoothUtils {
 
     static int getDistance(int rssi) {
         int irssi = Math.abs(rssi);
