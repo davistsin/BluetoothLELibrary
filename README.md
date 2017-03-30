@@ -10,7 +10,7 @@
 该库只支持1对1连接，如果你想1对多设备连接，请移步至
 [BluetoothLE-Multi-Library](https://github.com/qindachang/BluetoothLE-Multi-Library "BluetoothLE-Multi-Library")
 
-demo运行环境 Android Studio 2.2.3
+demo运行环境 Android Studio 2.3
 
 低功耗蓝牙库。**优势**：
 
