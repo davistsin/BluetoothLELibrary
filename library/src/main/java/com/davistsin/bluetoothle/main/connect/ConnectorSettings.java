@@ -2,7 +2,7 @@ package com.davistsin.bluetoothle.main.connect;
 
 public class ConnectorSettings {
 
-    public static int QUEUE_INTERVAL_TIME_AUTO = -1;
+    public static int QUEUE_INTERVAL_TIME_AUTO = Integer.MIN_VALUE;
 
     volatile boolean autoConnect;
     volatile boolean autoDiscoverServices;
@@ -54,7 +54,7 @@ public class ConnectorSettings {
 
         /**
          * 队列时间间隔。
-         * @param milliseconds 毫秒
+         * @param milliseconds ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO 自动读取硬件信息获得间隔时间。或者毫秒。
          * @return
          */
         public Builder setQueueIntervalTime(int milliseconds) {

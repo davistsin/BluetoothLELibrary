@@ -45,7 +45,7 @@ public class BleConnector {
     private final Set<BleWriteCharacteristicListener> mWriteCharacteristicListeners = new CopyOnWriteArraySet<>();
     private final Set<BleReadCharacteristicListener> mReadCharacteristicListeners = new CopyOnWriteArraySet<>();
     private final Set<BleNotificationListener> mNotificationListeners = new CopyOnWriteArraySet<>();
-    private final Set<BleIndicationListener> mBleIndicationListeners = new CopyOnWriteArraySet<>();
+    private final Set<BleIndicationListener> mIndicationListeners = new CopyOnWriteArraySet<>();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final RequestQueue mRequestQueue = new RequestQueue();
@@ -140,7 +140,7 @@ public class BleConnector {
                     mConnParameters.setProperties("READ");
                     mConnParameters.setSlaveLatency(slaveLatency);
                     mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
-                    if (mConnectorSettings.queueIntervalTime < 0) {
+                    if (mConnectorSettings.queueIntervalTime == ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO) {
                         mConnectorSettings.queueIntervalTime = (int) connIntervalMax + 20;
                     }
                 }
@@ -203,6 +203,10 @@ public class BleConnector {
     }
 
     public void writeCharacteristic(byte[] bytes, UUID serviceUUID, UUID characteristicUUID) {
+        if (!connected) {
+            Log.e(TAG, "Error: writeCharacteristic(). Bluetooth not connected.");
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
             Log.e(TAG, "Error: writeCharacteristic(). Can not find service by UUID: " + serviceUUID);
@@ -221,6 +225,10 @@ public class BleConnector {
     }
 
     public void readCharacteristic(UUID serviceUUID, UUID characteristicUUID) {
+        if (!connected) {
+            Log.e(TAG, "Error: readCharacteristic(). Bluetooth not connected.");
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
             Log.e(TAG, "Error: readCharacteristic(). Can not find service by UUID: " + serviceUUID);
@@ -247,6 +255,10 @@ public class BleConnector {
     }
 
     public void enableNotification(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        if (!connected) {
+            Log.e(TAG, "Error: enableNotification(). Bluetooth not connected.");
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
             Log.e(TAG, "Error: enableNotification(). Can not find service by UUID: " + serviceUUID);
@@ -275,6 +287,10 @@ public class BleConnector {
     }
 
     public void enableIndication(boolean enable, UUID serviceUUID, UUID[] characteristicUUIDs) {
+        if (!connected) {
+            Log.e(TAG, "Error: enableIndication(). Bluetooth not connected.");
+            return;
+        }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
             Log.e(TAG, "Error: enableIndication(). Can not find service by UUID: " + serviceUUID);
@@ -316,7 +332,7 @@ public class BleConnector {
     }
 
     public BleConnector addIndicationListener(BleIndicationListener bleIndicationListener) {
-        mBleIndicationListeners.add(bleIndicationListener);
+        mIndicationListeners.add(bleIndicationListener);
         return this;
     }
 
@@ -336,7 +352,7 @@ public class BleConnector {
     }
 
     public BleConnector removeIndicationListeners(BleIndicationListener... listeners) {
-        mBleIndicationListeners.removeAll(Arrays.asList(listeners));
+        mIndicationListeners.removeAll(Arrays.asList(listeners));
         return this;
     }
 
@@ -344,7 +360,7 @@ public class BleConnector {
         mConnectionListeners.clear();
         mDiscoverServicesListeners.clear();
         mNotificationListeners.clear();
-        mBleIndicationListeners.clear();
+        mIndicationListeners.clear();
         mReadCharacteristicListeners.clear();
         mWriteCharacteristicListeners.clear();
         return this;
@@ -371,6 +387,7 @@ public class BleConnector {
     }
 
     public void close() {
+        mRequestQueue.cancel();
         removeAllListeners();
         disconnect();
         mBluetoothGatt = null;
@@ -392,6 +409,9 @@ public class BleConnector {
 
     }
 
+    /**
+     * 读取已连接设备的一些硬件信息
+     */
     private void readConnectionParameters() {
         if (mBluetoothGatt != null) {
             BluetoothGattService service = mBluetoothGatt.getService(SERVICE);
@@ -436,6 +456,7 @@ public class BleConnector {
                     enableIndication(request.isEnable(), request.getCharacteristic());
                     break;
             }
+            next();
         }
 
         void next() {

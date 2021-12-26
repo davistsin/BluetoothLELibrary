@@ -1,4 +1,5 @@
 package com.davistsin.bluetoothle.replicas;
+
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -16,8 +17,6 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -27,55 +26,36 @@ import androidx.annotation.RequiresPermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Created by David Qin on 2017/4/19.
+ * BLE从机
  */
-
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public final class BleGattServer {
     private static final String TAG = BleGattServer.class.getSimpleName();
-
     public static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    private final List<BluetoothDevice> mConnectDevices = new ArrayList<>();
 
     private BluetoothGattServer mBluetoothGattServer;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
 
-    private List<BluetoothDevice> mConnectDevices = new ArrayList<>();
+    private Set<OnAdvertiseListener> mOnAdvertiseListeners = new CopyOnWriteArraySet<>();
+    private Set<OnConnectionStateChangeListener> mOnConnectionStateChangeListeners = new CopyOnWriteArraySet<>();
+    private Set<OnServiceAddedListener> mOnServiceAddedListeners = new CopyOnWriteArraySet<>();
+    private Set<OnWriteRequestListener> mOnWriteRequestListeners = new CopyOnWriteArraySet<>();
+    private Set<OnReadRequestListener> mOnReadRequestListeners = new CopyOnWriteArraySet<>();
 
-    private OnAdvertiseListener mOnAdvertiseListener;
-    private OnConnectionStateChangeListener mOnConnectionStateChangeListener;
-    private OnServiceAddedListener mOnServiceAddedListener;
-    private OnWriteRequestListener mOnWriteRequestListener;
-    private OnReadRequestListener mOnReadRequestListener;
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
-
-    private void runOnUiThread(Runnable runnable) {
-        if (isAndroidMainThread()) {
-            runnable.run();
-        } else {
-            mHandler.post(runnable);
-        }
-    }
-
-    private static boolean isAndroidMainThread() {
-        return Looper.myLooper() == Looper.getMainLooper();
-    }
-
-    private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
+    private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(final AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
 
-            if (mOnAdvertiseListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnAdvertiseListener.onStartSuccess(settingsInEffect);
-                    }
-                });
+            for (OnAdvertiseListener listener : mOnAdvertiseListeners) {
+                listener.onStartSuccess(settingsInEffect);
             }
 
         }
@@ -84,18 +64,14 @@ public final class BleGattServer {
         public void onStartFailure(final int errorCode) {
             super.onStartFailure(errorCode);
 
-            if (mOnAdvertiseListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnAdvertiseListener.onStartFailure(errorCode);
-                    }
-                });
+            for (OnAdvertiseListener listener : mOnAdvertiseListeners) {
+                listener.onStartFailure(errorCode);
             }
+
         }
     };
 
-    private BluetoothGattServerCallback mBluetoothGattServerCallback = new BluetoothGattServerCallback() {
+    private final BluetoothGattServerCallback mBluetoothGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(final BluetoothDevice device, final int status, final int newState) {
             super.onConnectionStateChange(device, status, newState);
@@ -105,18 +81,13 @@ public final class BleGattServer {
                 mConnectDevices.remove(device);
             }
 
-            if (mOnConnectionStateChangeListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (newState == BluetoothProfile.STATE_CONNECTED) {
-                            mOnConnectionStateChangeListener.onConnected(device);
-                        } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                            mOnConnectionStateChangeListener.onDisconnected(device);
-                        }
-                        mOnConnectionStateChangeListener.onChange(device, status, newState);
-                    }
-                });
+            for (OnConnectionStateChangeListener listener : mOnConnectionStateChangeListeners) {
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    listener.onConnected(device);
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    listener.onDisconnected(device);
+                }
+                listener.onChange(device, status, newState);
             }
 
         }
@@ -125,17 +96,12 @@ public final class BleGattServer {
         public void onServiceAdded(final int status, final BluetoothGattService service) {
             super.onServiceAdded(status, service);
 
-            if (mOnServiceAddedListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (status == BluetoothGatt.GATT_SUCCESS) {
-                            mOnServiceAddedListener.onSuccess(service);
-                        } else {
-                            mOnServiceAddedListener.onFail(service);
-                        }
-                    }
-                });
+            for (OnServiceAddedListener listener : mOnServiceAddedListeners) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    listener.onSuccess(service);
+                } else {
+                    listener.onFail(service);
+                }
             }
 
         }
@@ -146,13 +112,8 @@ public final class BleGattServer {
             Log.d(TAG, "onCharacteristicReadRequest : " + Arrays.toString(characteristic.getValue()));
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, characteristic.getValue());
 
-            if (mOnReadRequestListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnReadRequestListener.onCharacteristicRead(device, characteristic);
-                    }
-                });
+            for (OnReadRequestListener listener : mOnReadRequestListeners) {
+                listener.onCharacteristicRead(device, characteristic);
             }
         }
 
@@ -162,13 +123,8 @@ public final class BleGattServer {
             Log.d(TAG, "onCharacteristicWriteRequest : " + Arrays.toString(value));
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, value);
 
-            if (mOnWriteRequestListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnWriteRequestListener.onCharacteristicWritten(device, characteristic, value);
-                    }
-                });
+            for (OnWriteRequestListener listener : mOnWriteRequestListeners) {
+                listener.onCharacteristicWritten(device, characteristic, value);
             }
         }
 
@@ -178,13 +134,8 @@ public final class BleGattServer {
             Log.d(TAG, "onDescriptorReadRequest : " + Arrays.toString(descriptor.getValue()));
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, descriptor.getValue());
 
-            if (mOnReadRequestListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnReadRequestListener.onDescriptorRead(device, descriptor);
-                    }
-                });
+            for (OnReadRequestListener listener : mOnReadRequestListeners) {
+                listener.onDescriptorRead(device, descriptor);
             }
         }
 
@@ -194,14 +145,10 @@ public final class BleGattServer {
             Log.d(TAG, "onDescriptorWriteRequest : " + Arrays.toString(value));
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, value);
 
-            if (mOnWriteRequestListener != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnWriteRequestListener.onDescriptorWritten(device, descriptor, value);
-                    }
-                });
+            for (OnWriteRequestListener listener : mOnWriteRequestListeners) {
+                listener.onDescriptorWritten(device, descriptor, value);
             }
+
         }
 
         @Override
@@ -261,8 +208,8 @@ public final class BleGattServer {
             return false;
         }
         mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
-        if (mOnAdvertiseListener != null) {
-            mOnAdvertiseListener.onStopAdvertising();
+        for (OnAdvertiseListener listener : mOnAdvertiseListeners) {
+            listener.onStopAdvertising();
         }
         return true;
     }
@@ -341,43 +288,51 @@ public final class BleGattServer {
         mBluetoothGattServer.notifyCharacteristicChanged(device, characteristic, true);
     }
 
-    public void setOnAdvertiseListener(OnAdvertiseListener onAdvertiseListener) {
-        mOnAdvertiseListener = onAdvertiseListener;
+    public void addOnAdvertiseListener(OnAdvertiseListener listener) {
+        mOnAdvertiseListeners.add(listener);
     }
 
-    public void removeAdvertiseStartListener() {
-        mOnAdvertiseListener = null;
+    public void removeAdvertiseStartListener(OnAdvertiseListener listener) {
+        mOnAdvertiseListeners.remove(listener);
     }
 
-    public void setOnConnectionStateChangeListener(OnConnectionStateChangeListener onConnectionStateChangeListener) {
-        mOnConnectionStateChangeListener = onConnectionStateChangeListener;
+    public void setOnConnectionStateChangeListener(OnConnectionStateChangeListener listener) {
+        mOnConnectionStateChangeListeners.add(listener);
     }
 
-    public void removeConnectionStateChangeListener() {
-        mOnConnectionStateChangeListener = null;
+    public void removeConnectionStateChangeListener(OnConnectionStateChangeListener listener) {
+        mOnConnectionStateChangeListeners.remove(listener);
     }
 
-    public void setOnServiceAddedListener(OnServiceAddedListener onServiceAddedListener) {
-        mOnServiceAddedListener = onServiceAddedListener;
+    public void setOnServiceAddedListener(OnServiceAddedListener listener) {
+        mOnServiceAddedListeners.add(listener);
     }
 
-    public void removeServiceAddedListener() {
-        mOnServiceAddedListener = null;
+    public void removeServiceAddedListener(OnServiceAddedListener listener) {
+        mOnServiceAddedListeners.remove(listener);
     }
 
-    public void setOnWriteRequestListener(OnWriteRequestListener onWriteRequestListener) {
-        mOnWriteRequestListener = onWriteRequestListener;
+    public void setOnWriteRequestListener(OnWriteRequestListener listener) {
+        mOnWriteRequestListeners.add(listener);
     }
 
-    public void removeWriteRequestListener() {
-        mOnWriteRequestListener = null;
+    public void removeWriteRequestListener(OnWriteRequestListener listener) {
+        mOnWriteRequestListeners.remove(listener);
     }
 
-    public void setOnReadRequestListener(OnReadRequestListener onReadRequestListener) {
-        mOnReadRequestListener = onReadRequestListener;
+    public void setOnReadRequestListener(OnReadRequestListener listener) {
+        mOnReadRequestListeners.add(listener);
     }
 
-    public void removeReadRequestListener() {
-        mOnReadRequestListener = null;
+    public void removeReadRequestListener(OnReadRequestListener listener) {
+        mOnReadRequestListeners.remove(listener);
+    }
+
+    public void removeAllListeners() {
+        mOnAdvertiseListeners.clear();
+        mOnConnectionStateChangeListeners.clear();
+        mOnServiceAddedListeners.clear();
+        mOnWriteRequestListeners.clear();
+        mOnReadRequestListeners.clear();
     }
 }
