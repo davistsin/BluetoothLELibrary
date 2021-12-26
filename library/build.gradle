@@ -1,38 +1,39 @@
+buildscript {
+    ext.safeExtGet = {prop, fallback ->
+        rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '25.0.0'
+    compileSdkVersion safeExtGet('compileSdkVersion', 29)
 
     defaultConfig {
-        minSdkVersion 18
-        targetSdkVersion 24
-        versionCode 34
-        versionName "1.7.4"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        minSdkVersion safeExtGet('minSdkVersion', 18)
+        targetSdkVersion safeExtGet('targetSdkVersion', 29)
+        versionCode 1
+        versionName "1.0"
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
+
+repositories {
+    google()
+    mavenCentral()
+}
+
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v4:24.2.1'
-}
-//添加
-publish {
-    userOrg = 'qindachang'
-    groupId = 'com.qindachang'
-    artifactId = 'BluetoothLELibrary'
-    publishVersion = '0.7.4'
-    desc = 'Android Bluetooth LE library'
-    website = 'https://github.com/qindachang/BluetoothLELibrary'
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    api 'no.nordicsemi.android.support.v18:scanner:1.6.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
 }

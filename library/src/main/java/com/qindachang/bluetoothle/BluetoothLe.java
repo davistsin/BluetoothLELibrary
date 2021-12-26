@@ -148,6 +148,18 @@ public class BluetoothLe {
         return this;
     }
 
+    public void startScan() {
+        mBleManager.scan(null, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
+        filterDeviceNameList.clear();
+        filterDeviceAddressList.clear();
+        uFilerServiceUUIDList.clear();
+        scanPeriod = 0;
+    }
+
+    public void startScan(OnLeScanListener onLeScanListener) {
+        startScan(null, onLeScanListener);
+    }
+
     public void startScan(Activity activity, OnLeScanListener onLeScanListener) {
         mBleManager.setOnLeScanListener(onLeScanListener);
         mBleManager.scan(activity, filterDeviceNameList, filterDeviceAddressList, uFilerServiceUUIDList, scanPeriod, reportDelayMillis);
