@@ -19,6 +19,7 @@ import com.davistsin.bluetoothle.main.listener.BleDiscoverServicesListener;
 import com.davistsin.bluetoothle.main.listener.BleIndicationListener;
 import com.davistsin.bluetoothle.main.listener.BleNotificationListener;
 import com.davistsin.bluetoothle.main.listener.BleReadCharacteristicListener;
+import com.davistsin.bluetoothle.main.listener.BleRssiListener;
 import com.davistsin.bluetoothle.main.listener.BleWriteCharacteristicListener;
 
 import java.lang.ref.WeakReference;
@@ -46,6 +47,7 @@ public class BleConnector {
     private final Set<BleReadCharacteristicListener> mReadCharacteristicListeners = new CopyOnWriteArraySet<>();
     private final Set<BleNotificationListener> mNotificationListeners = new CopyOnWriteArraySet<>();
     private final Set<BleIndicationListener> mIndicationListeners = new CopyOnWriteArraySet<>();
+    private final Set<BleRssiListener> mRssiListeners = new CopyOnWriteArraySet<>();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final RequestQueue mRequestQueue = new RequestQueue();
@@ -91,7 +93,7 @@ public class BleConnector {
                     }
 
                     for (BleConnectionListener listener : mConnectionListeners) {
-                        listener.onConnected();
+                        listener.onConnected(mBluetoothDevice);
                     }
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
@@ -126,35 +128,83 @@ public class BleConnector {
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
 
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (characteristic.getUuid().equals(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID)) {
-                    List<Integer> parameters = bytes2IntegerList(characteristic.getValue());
-                    double connIntervalMin = (parameters.get(1) * 16 + parameters.get(0)) * 1.25;
-                    double connIntervalMax = (parameters.get(3) * 16 + parameters.get(2)) * 1.25;
-                    int slaveLatency = parameters.get(5) * 16 + parameters.get(4);
-                    int connSupervisionTimeout = parameters.get(7) * 16 + parameters.get(6);
-                    mConnParameters = new ConnParameters();
-                    mConnParameters.setUUID(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
-                    mConnParameters.setConnIntervalMin(connIntervalMin);
-                    mConnParameters.setConnIntervalMax(connIntervalMax);
-                    mConnParameters.setProperties("READ");
-                    mConnParameters.setSlaveLatency(slaveLatency);
-                    mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
-                    if (mConnectorSettings.queueIntervalTime == ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO) {
-                        mConnectorSettings.queueIntervalTime = (int) connIntervalMax + 20;
+            switch (status) {
+                case BluetoothGatt.GATT_SUCCESS:
+                    if (characteristic.getUuid().equals(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID)) {
+                        List<Integer> parameters = bytes2IntegerList(characteristic.getValue());
+                        double connIntervalMin = (parameters.get(1) * 16 + parameters.get(0)) * 1.25;
+                        double connIntervalMax = (parameters.get(3) * 16 + parameters.get(2)) * 1.25;
+                        int slaveLatency = parameters.get(5) * 16 + parameters.get(4);
+                        int connSupervisionTimeout = parameters.get(7) * 16 + parameters.get(6);
+                        mConnParameters = new ConnParameters();
+                        mConnParameters.setUUID(PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID);
+                        mConnParameters.setConnIntervalMin(connIntervalMin);
+                        mConnParameters.setConnIntervalMax(connIntervalMax);
+                        mConnParameters.setProperties("READ");
+                        mConnParameters.setSlaveLatency(slaveLatency);
+                        mConnParameters.setSupervisionTimeout(connSupervisionTimeout);
+                        if (mConnectorSettings.queueIntervalTime == ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO) {
+                            mConnectorSettings.queueIntervalTime = (int) connIntervalMax + 20;
+                        }
+                    } else {
+                        for (BleReadCharacteristicListener listener: mReadCharacteristicListeners) {
+                            listener.onSuccess(characteristic);
+                        }
                     }
-                }
+                    break;
+                case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION:
+                    for (BleReadCharacteristicListener listener: mReadCharacteristicListeners) {
+                        listener.onFailure();
+                    }
+                    break;
+                default:
+                    for (BleReadCharacteristicListener listener: mReadCharacteristicListeners) {
+                        listener.onFailure();
+                    }
+                    break;
             }
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
+
+            switch (status) {
+                case BluetoothGatt.GATT_SUCCESS:
+                    for (BleWriteCharacteristicListener listener: mWriteCharacteristicListeners) {
+                        listener.onSuccess(characteristic);
+                    }
+                    break;
+                case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION:
+                    for (BleWriteCharacteristicListener listener: mWriteCharacteristicListeners) {
+                        listener.onFailed();
+                    }
+                    break;
+                default:
+                    for (BleWriteCharacteristicListener listener: mWriteCharacteristicListeners) {
+                        listener.onFailed();
+                    }
+                    break;
+            }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
+
+            BluetoothGattDescriptor cccd = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+            boolean notifications = cccd == null || cccd.getValue() == null || cccd.getValue().length != 2 || cccd.getValue()[0] == 0x01;
+
+
+            if (notifications) {
+                for (BleNotificationListener listener: mNotificationListeners) {
+                    listener.onSuccess(characteristic);
+                }
+            } else {
+                for (BleIndicationListener listener : mIndicationListeners) {
+                    listener.onSuccess(characteristic);
+                }
+            }
         }
 
         @Override
@@ -175,6 +225,11 @@ public class BleConnector {
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             super.onReadRemoteRssi(gatt, rssi, status);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                for (BleRssiListener listener : mRssiListeners) {
+                    listener.onSuccess(rssi);
+                }
+            }
         }
     };
 
@@ -336,6 +391,11 @@ public class BleConnector {
         return this;
     }
 
+    public BleConnector addRssiListener(BleRssiListener bleRssiListener) {
+        mRssiListeners.add(bleRssiListener);
+        return this;
+    }
+
     public BleConnector removeConnectionListeners(BleConnectionListener... listeners) {
         mConnectionListeners.removeAll(Arrays.asList(listeners));
         return this;
@@ -356,6 +416,11 @@ public class BleConnector {
         return this;
     }
 
+    public BleConnector removeRssiListeners(BleRssiListener... listeners) {
+        mRssiListeners.removeAll(Arrays.asList(listeners));
+        return this;
+    }
+
     public BleConnector removeAllListeners() {
         mConnectionListeners.clear();
         mDiscoverServicesListeners.clear();
@@ -363,6 +428,7 @@ public class BleConnector {
         mIndicationListeners.clear();
         mReadCharacteristicListeners.clear();
         mWriteCharacteristicListeners.clear();
+        mRssiListeners.clear();
         return this;
     }
 
@@ -387,26 +453,66 @@ public class BleConnector {
     }
 
     public void close() {
-        mRequestQueue.cancel();
         removeAllListeners();
+        mRequestQueue.cancel();
         disconnect();
         mBluetoothGatt = null;
     }
 
     private void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
-
+        if (mBluetoothGatt == null || characteristic == null) {
+            return;
+        }
+        int properties = characteristic.getProperties();
+        if ((properties & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) == 0) {
+            return;
+        }
+        mBluetoothGatt.writeCharacteristic(characteristic);
     }
 
     private void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-
+        if (mBluetoothGatt == null || characteristic == null) {
+            return;
+        }
+        int properties = characteristic.getProperties();
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
+            return;
+        }
+        mBluetoothGatt.readCharacteristic(characteristic);
     }
 
     private void enableNotification(boolean enable, BluetoothGattCharacteristic characteristic) {
-
+        if (mBluetoothGatt == null || characteristic == null) {
+            return;
+        }
+        int properties = characteristic.getProperties();
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0) {
+            return;
+        }
+        mBluetoothGatt.setCharacteristicNotification(characteristic, enable);
+        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+        if (descriptor == null) {
+            return;
+        }
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mBluetoothGatt.writeDescriptor(descriptor);
     }
 
     private void enableIndication(boolean enable, BluetoothGattCharacteristic characteristic) {
-
+        if (mBluetoothGatt == null || characteristic == null) {
+            return;
+        }
+        int properties = characteristic.getProperties();
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) == 0) {
+            return;
+        }
+        mBluetoothGatt.setCharacteristicNotification(characteristic, enable);
+        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+        if (descriptor == null) {
+            return;
+        }
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+        mBluetoothGatt.writeDescriptor(descriptor);
     }
 
     /**

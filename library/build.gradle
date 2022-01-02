@@ -34,6 +34,5 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    api 'no.nordicsemi.android.support.v18:scanner:1.6.0'
     implementation 'androidx.annotation:annotation:1.2.0'
 }
