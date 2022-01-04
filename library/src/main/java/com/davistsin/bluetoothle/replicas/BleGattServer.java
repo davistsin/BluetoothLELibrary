@@ -40,14 +40,14 @@ public final class BleGattServer {
 
     private final List<BluetoothDevice> mConnectDevices = new ArrayList<>();
 
+    private final Set<OnAdvertiseListener> mOnAdvertiseListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnConnectionStateChangeListener> mOnConnectionStateChangeListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnServiceAddedListener> mOnServiceAddedListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnWriteRequestListener> mOnWriteRequestListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnReadRequestListener> mOnReadRequestListeners = new CopyOnWriteArraySet<>();
+
     private BluetoothGattServer mBluetoothGattServer;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-
-    private Set<OnAdvertiseListener> mOnAdvertiseListeners = new CopyOnWriteArraySet<>();
-    private Set<OnConnectionStateChangeListener> mOnConnectionStateChangeListeners = new CopyOnWriteArraySet<>();
-    private Set<OnServiceAddedListener> mOnServiceAddedListeners = new CopyOnWriteArraySet<>();
-    private Set<OnWriteRequestListener> mOnWriteRequestListeners = new CopyOnWriteArraySet<>();
-    private Set<OnReadRequestListener> mOnReadRequestListeners = new CopyOnWriteArraySet<>();
 
     private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override

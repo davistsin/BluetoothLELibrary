@@ -38,9 +38,6 @@ public class BleConnector {
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private static final UUID PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS_UUID = UUID.fromString("00002A04-0000-1000-8000-00805f9b34fb");
 
-    private final WeakReference<Context> mWeakContext;
-    private final BluetoothDevice mBluetoothDevice;
-
     private final Set<BleConnectionListener> mConnectionListeners = new CopyOnWriteArraySet<>();
     private final Set<BleDiscoverServicesListener> mDiscoverServicesListeners = new CopyOnWriteArraySet<>();
     private final Set<BleWriteCharacteristicListener> mWriteCharacteristicListeners = new CopyOnWriteArraySet<>();
@@ -51,6 +48,9 @@ public class BleConnector {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final RequestQueue mRequestQueue = new RequestQueue();
+
+    private final WeakReference<Context> mWeakContext;
+    private final BluetoothDevice mBluetoothDevice;
 
     private BluetoothGatt mBluetoothGatt;
     private ConnectorSettings mConnectorSettings;
@@ -264,12 +264,12 @@ public class BleConnector {
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
-            Log.e(TAG, "Error: writeCharacteristic(). Can not find service by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: writeCharacteristic(). Can not find service by UUID: " + serviceUUID.toString());
             return;
         }
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
         if (characteristic == null) {
-            Log.e(TAG, "Error: writeCharacteristic(). Can not find characteristic by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: writeCharacteristic(). Can not find characteristic by UUID: " + serviceUUID.toString());
             return;
         }
         mRequestQueue.addRequest(Request.newWriteRequest(characteristic, bytes));
@@ -286,12 +286,12 @@ public class BleConnector {
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
-            Log.e(TAG, "Error: readCharacteristic(). Can not find service by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: readCharacteristic(). Can not find service by UUID: " + serviceUUID.toString());
             return;
         }
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
         if (characteristic == null) {
-            Log.e(TAG, "Error: readCharacteristic(). Can not find characteristic by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: readCharacteristic(). Can not find characteristic by UUID: " + serviceUUID.toString());
             return;
         }
         mRequestQueue.addRequest(Request.newReadRequest(characteristic));
@@ -316,13 +316,13 @@ public class BleConnector {
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
-            Log.e(TAG, "Error: enableNotification(). Can not find service by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: enableNotification(). Can not find service by UUID: " + serviceUUID.toString());
             return;
         }
         for (UUID characteristicUUID : characteristicUUIDs) {
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
             if (characteristic == null) {
-                Log.e(TAG, "Error: enableNotification(). Can not find characteristic by UUID: " + serviceUUID);
+                Log.e(TAG, "Error: enableNotification(). Can not find characteristic by UUID: " + serviceUUID.toString());
                 continue;
             }
             mRequestQueue.addRequest(Request.newEnableNotificationsRequest(enable, characteristic));
@@ -348,13 +348,13 @@ public class BleConnector {
         }
         BluetoothGattService service = mBluetoothGatt.getService(serviceUUID);
         if (service == null) {
-            Log.e(TAG, "Error: enableIndication(). Can not find service by UUID: " + serviceUUID);
+            Log.e(TAG, "Error: enableIndication(). Can not find service by UUID: " + serviceUUID.toString());
             return;
         }
         for (UUID characteristicUUID : characteristicUUIDs) {
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
             if (characteristic == null) {
-                Log.e(TAG, "Error: enableIndication(). Can not find characteristic by UUID: " + serviceUUID);
+                Log.e(TAG, "Error: enableIndication(). Can not find characteristic by UUID: " + serviceUUID.toString());
                 continue;
             }
             mRequestQueue.addRequest(Request.newEnableIndicationsRequest(enable, characteristic));
@@ -465,6 +465,7 @@ public class BleConnector {
         }
         int properties = characteristic.getProperties();
         if ((properties & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) == 0) {
+            Log.e(TAG, "Error: writeCharacteristic(). " + characteristic.getUuid().toString() + " can not be written");
             return;
         }
         mBluetoothGatt.writeCharacteristic(characteristic);
@@ -476,6 +477,7 @@ public class BleConnector {
         }
         int properties = characteristic.getProperties();
         if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
+            Log.e(TAG, "Error: readCharacteristic(). " + characteristic.getUuid().toString() + " is not readable");
             return;
         }
         mBluetoothGatt.readCharacteristic(characteristic);
@@ -487,6 +489,7 @@ public class BleConnector {
         }
         int properties = characteristic.getProperties();
         if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0) {
+            Log.e(TAG, "Error: enableNotification(). " + characteristic.getUuid().toString() + " not supports notification");
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enable);
@@ -504,6 +507,7 @@ public class BleConnector {
         }
         int properties = characteristic.getProperties();
         if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) == 0) {
+            Log.e(TAG, "Error: enableIndication(). " + characteristic.getUuid().toString() + " not supports indication");
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enable);
