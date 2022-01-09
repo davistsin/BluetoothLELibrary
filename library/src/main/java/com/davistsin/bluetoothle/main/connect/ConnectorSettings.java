@@ -54,7 +54,7 @@ public class ConnectorSettings {
 
         /**
          * 队列时间间隔。
-         * @param milliseconds ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO 自动读取硬件信息获得间隔时间。或者毫秒。
+         * @param milliseconds ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO 自动读取硬件信息获得间隔时间。或者手动毫秒。
          * @return
          */
         public Builder setQueueIntervalTime(int milliseconds) {
