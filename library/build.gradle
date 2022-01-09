@@ -8,7 +8,20 @@ buildscript {
     }
 }
 
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+group = 'com.github.davistsin'
+version = '1.0.0'
+
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 29)
@@ -17,7 +30,7 @@ android {
         minSdkVersion safeExtGet('minSdkVersion', 18)
         targetSdkVersion safeExtGet('targetSdkVersion', 29)
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
 
     compileOptions {
@@ -26,13 +39,22 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
 
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.annotation:annotation:1.2.0'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.davistsin'
+                artifactId = 'BluetoothLELibrary'
+                version = '1.0.0'
+            }
+        }
+    }
 }

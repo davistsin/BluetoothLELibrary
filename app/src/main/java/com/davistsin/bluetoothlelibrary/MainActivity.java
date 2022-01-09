@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // TODO: Demo
         BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
         ScanSettings settings = new ScanSettings.Builder()
                 .setLegacy(false)
@@ -42,14 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onScanResult(callbackType, result);
                 BluetoothDevice device = result.getDevice();
 
-                ConnectorSettings connectorSettings = new ConnectorSettings.Builder()
-                        .autoConnect(true)
-                        .autoDiscoverServices(true)
-                        .enableQueue(true)
-                        .setQueueIntervalTime(ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO)
-                        .build();
-                BleConnector connector = BleConnectCreator.create(MainActivity.this, device, connectorSettings);
-                connector.connect();
             }
 
             @Override

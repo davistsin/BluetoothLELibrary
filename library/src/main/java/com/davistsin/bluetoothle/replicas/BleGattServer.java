@@ -40,14 +40,14 @@ public final class BleGattServer {
 
     private final List<BluetoothDevice> mConnectDevices = new ArrayList<>();
 
+    private final Set<OnAdvertiseListener> mOnAdvertiseListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnConnectionStateChangeListener> mOnConnectionStateChangeListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnServiceAddedListener> mOnServiceAddedListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnWriteRequestListener> mOnWriteRequestListeners = new CopyOnWriteArraySet<>();
+    private final Set<OnReadRequestListener> mOnReadRequestListeners = new CopyOnWriteArraySet<>();
+
     private BluetoothGattServer mBluetoothGattServer;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-
-    private Set<OnAdvertiseListener> mOnAdvertiseListeners = new CopyOnWriteArraySet<>();
-    private Set<OnConnectionStateChangeListener> mOnConnectionStateChangeListeners = new CopyOnWriteArraySet<>();
-    private Set<OnServiceAddedListener> mOnServiceAddedListeners = new CopyOnWriteArraySet<>();
-    private Set<OnWriteRequestListener> mOnWriteRequestListeners = new CopyOnWriteArraySet<>();
-    private Set<OnReadRequestListener> mOnReadRequestListeners = new CopyOnWriteArraySet<>();
 
     private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
@@ -230,6 +230,7 @@ public final class BleGattServer {
         }
         stopAdvertising();
         mBluetoothGattServer.close();
+        removeAllListeners();
         return true;
     }
 
@@ -296,7 +297,7 @@ public final class BleGattServer {
         mOnAdvertiseListeners.remove(listener);
     }
 
-    public void setOnConnectionStateChangeListener(OnConnectionStateChangeListener listener) {
+    public void addOnConnectionStateChangeListener(OnConnectionStateChangeListener listener) {
         mOnConnectionStateChangeListeners.add(listener);
     }
 
@@ -304,7 +305,7 @@ public final class BleGattServer {
         mOnConnectionStateChangeListeners.remove(listener);
     }
 
-    public void setOnServiceAddedListener(OnServiceAddedListener listener) {
+    public void addOnServiceAddedListener(OnServiceAddedListener listener) {
         mOnServiceAddedListeners.add(listener);
     }
 
@@ -312,7 +313,7 @@ public final class BleGattServer {
         mOnServiceAddedListeners.remove(listener);
     }
 
-    public void setOnWriteRequestListener(OnWriteRequestListener listener) {
+    public void addOnWriteRequestListener(OnWriteRequestListener listener) {
         mOnWriteRequestListeners.add(listener);
     }
 
@@ -320,7 +321,7 @@ public final class BleGattServer {
         mOnWriteRequestListeners.remove(listener);
     }
 
-    public void setOnReadRequestListener(OnReadRequestListener listener) {
+    public void addOnReadRequestListener(OnReadRequestListener listener) {
         mOnReadRequestListeners.add(listener);
     }
 

@@ -152,11 +152,6 @@ public class BleConnector {
                         }
                     }
                     break;
-                case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION:
-                    for (BleReadCharacteristicListener listener: mReadCharacteristicListeners) {
-                        listener.onFailure();
-                    }
-                    break;
                 default:
                     for (BleReadCharacteristicListener listener: mReadCharacteristicListeners) {
                         listener.onFailure();
@@ -173,11 +168,6 @@ public class BleConnector {
                 case BluetoothGatt.GATT_SUCCESS:
                     for (BleWriteCharacteristicListener listener: mWriteCharacteristicListeners) {
                         listener.onSuccess(characteristic);
-                    }
-                    break;
-                case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION:
-                    for (BleWriteCharacteristicListener listener: mWriteCharacteristicListeners) {
-                        listener.onFailed();
                     }
                     break;
                 default:
@@ -453,9 +443,9 @@ public class BleConnector {
     }
 
     public void close() {
-        removeAllListeners();
         mRequestQueue.cancel();
         disconnect();
+        removeAllListeners();
         mBluetoothGatt = null;
     }
 

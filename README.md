@@ -1,9 +1,9 @@
+![title](./image/title.jpg)
 
-![Release Version](https://img.shields.io/badge/release-1.0-red.svg)
+[![Release](https://jitpack.io/v/User/Repo.svg)]
+(https://jitpack.io/#User/Repo)
 
-[English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
-
-
+[固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
 低功耗蓝牙库。**优势**：
 
@@ -19,10 +19,10 @@
 
 ### 注意点：
 
-1. Android 6.0扫描蓝牙需要地理位置权限。 Google动态权限开源库：[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
-2. Android 7.0扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
+1. Android 6.0 扫描蓝牙需要地理位置权限。[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
+2. Android 7.0 扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
 [LocationUtils](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/LocationUtils.java "LocationUtils")
-3. Android 12需要声明xxx权限
+3. Android 12 需要声明 BLUETOOTH_SCAN、BLUETOOTH_CONNECT 权限；如果使用蓝牙从机，则需要 BLUETOOTH_ADVERTISE 权限。（targets API 大于等于31时）
 4. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
 5. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
 
@@ -33,7 +33,13 @@
 添加依赖
 
 ```
-implementation '。。。'
+implementation 'com.github.davistsin:BluetoothLELibrary:{latest version}'
+```
+
+蓝牙扫描推荐使用 [Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)。
+
+```
+implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
 ```
 
 **权限：**
@@ -58,6 +64,14 @@ implementation '。。。'
 ```
 
 12以上需要
+
+```
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+```
 
 
 ### A. 使用介绍（主机模式）
@@ -93,6 +107,11 @@ BleHelper.getConnectedDevices(this);
 ```
 
 #### 一、扫描
+
+文档前往：
+
+[https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library]()
+
 #### 二、连接
 #### 三、发现服务
 #### 四、读取数据
@@ -106,9 +125,9 @@ BleHelper.getConnectedDevices(this);
 #### 一、开启广播
 
 ```java
-private GattServer mGattServer = new GattServer();
+private BleGattServer mGattServer = new BleGattServer();
 
-mGattServer.startAdvertising(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));//该uuid可提供给主机client过滤扫描
+mGattServer.startAdvertising(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")); // 该uuid可提供给主机client过滤扫描，可以自定义
 
 mGattServer.stopAdvertising();
 ```
@@ -165,7 +184,7 @@ mGattServer.addService(serviceSettings);
 #### 四、回调监听
 
 ```java
-mGattServer.setOnAdvertiseListener(new OnAdvertiseListener() {
+mGattServer.addOnAdvertiseListener(new OnAdvertiseListener() {
     @Override
     public void onStartSuccess(AdvertiseSettings settingsInEffect) {
         setContentText("开启广播  成功，uuid：0000fff0-0000-1000-8000-00805f9b34fb");
@@ -182,7 +201,7 @@ mGattServer.setOnAdvertiseListener(new OnAdvertiseListener() {
     }
 });
 
-mGattServer.setOnServiceAddedListener(new OnServiceAddedListener() {
+mGattServer.addOnServiceAddedListener(new OnServiceAddedListener() {
     @Override
     public void onSuccess(BluetoothGattService service) {
         setContentText("添加服务成功！");
@@ -194,7 +213,7 @@ mGattServer.setOnServiceAddedListener(new OnServiceAddedListener() {
     }
 });
 
-mGattServer.setOnConnectionStateChangeListener(new OnConnectionStateChangeListener() {
+mGattServer.addOnConnectionStateChangeListener(new OnConnectionStateChangeListener() {
     @Override
     public void onChange(BluetoothDevice device, int status, int newState) {
 
@@ -212,7 +231,7 @@ mGattServer.setOnConnectionStateChangeListener(new OnConnectionStateChangeListen
     }
 });
 
-mGattServer.setOnWriteRequestListener(new OnWriteRequestListener() {
+mGattServer.addOnWriteRequestListener(new OnWriteRequestListener() {
     @Override
     public void onCharacteristicWritten(BluetoothDevice device, BluetoothGattCharacteristic characteristic, byte[] value) {
         setContentText("设备写入特征请求 ： device = " + device.getAddress() + ", characteristic uuid = " + characteristic.getUuid().toString() + ", value = " + Arrays.toString(value));
