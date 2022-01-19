@@ -41,7 +41,7 @@ allprojects {
 }
 
 dependencies {
-    implementation 'com.github.davistsin:BluetoothLELibrary:{latest version}'
+    implementation 'com.github.davistsin:BluetoothLELibrary:v{latest version}'
 }
 
 ```
