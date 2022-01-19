@@ -1,1 +1,2 @@
+rootProject.name = 'BluetoothLELibrary'
 include ':app', ':library'

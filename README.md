@@ -1,374 +1,391 @@
+![title](./image/title.jpg)
 
-![title](https://github.com/qindachang/BluetoothLELibrary/blob/master/image/title.jpg)
+[![Release](https://jitpack.io/v/User/Repo.svg)]
+(https://jitpack.io/#User/Repo)  ![license](https://img.shields.io/github/license/davistsin/BluetoothLELibrary)
 
-![JitPack.io](https://img.shields.io/pypi/l/Django.svg)
-![Release Version](https://img.shields.io/badge/release-0.7.4-red.svg)
-
-[English](https://github.com/qindachang/BluetoothLELibrary/blob/master/README-EN.md "English") [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
-[下载jar文件](https://github.com/qindachang/BluetoothLELibrary/blob/master/jars/ "下载jar文件")
-
-该库只支持1对1连接，如果你想1对多设备连接，请移步至
-[BluetoothLE-Multi-Library](https://github.com/qindachang/BluetoothLE-Multi-Library "BluetoothLE-Multi-Library")
-
-demo运行环境 Android Studio 2.3
+[固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
 低功耗蓝牙库。**优势**：
 
-1. **适配**到Android5.0和Android6.0、7.0的扫描方式（速度极快）。
-2. 适配小米手机连接蓝牙操作。
-3. 适配三星手机发现服务、开启通知等。
-4. 支持**直接连发数百条**数据，而不用担心消息发不出。自带消息队列（终于可以像iOS一样啦，不用去写延时啦）。
-5. 支持同时**开启多个通知**。
-6. 可以连续操作发送数据、读取特征、开启通知，即使你在for循环中写也没问题，**自带队列**。
-6. 扫描操作支持-> 设置扫描时长、根据设备名称扫描、根据硬件地址扫描、根据服务UUID扫描、连接成功后自动关闭扫描。
-7. 队列定时设置，满足因公司需求蓝牙时间间隔。
-8. 设备信号强度、距离计算回调，可用于防丢器产品。
+1. **具有**主机、从机模式。在从机模式中，本机也可以开启蓝牙服务、读写特征。
+2. 同时连接多台蓝牙设备。
+3. 适配小米手机连接蓝牙操作。
+4. 适配三星手机发现服务、开启通知等。
+5. 支持**直接连发数百条**数据，而不用担心消息发不出。自带消息队列（终于可以像iOS一样啦，不用去写延时啦）。
+6. 支持同时**开启多个通知**。
+7. 可以连续操作发送数据、读取特征、开启通知，即使你在for循环中写也没问题，**自带队列**。
+8. 队列定时设置，满足因公司需求蓝牙时间间隔。
+9. 设备信号强度、距离计算回调，可用于防丢器产品。
 
 ### 注意点：
 
-1. Android 6.0扫描蓝牙需要地理位置权限。 Google动态权限开源库：[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
-2. Android 7.0扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
+1. Android 6.0 扫描蓝牙需要地理位置权限。[easypermissions](https://github.com/googlesamples/easypermissions "easypermissions")
+2. Android 7.0 扫描蓝牙需要地理位置权限，并且需要开启系统位置信息。
 [LocationUtils](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/LocationUtils.java "LocationUtils")
-[ApiLevelHelper](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ApiLevelHelper.java "ApiLevelHelper")
-3. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
-4. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
+3. Android 12 需要声明 BLUETOOTH_SCAN、BLUETOOTH_CONNECT 权限；如果使用蓝牙从机，则需要 BLUETOOTH_ADVERTISE 权限。（targets API 大于等于31时）
+4. 发送数据、开启通知、读取特征等操作，需要在onServicesDiscovered()发现服务之后才能进行。
+5. 连接设备之前最好先停止扫描（小米手机可能会出现不能发现服务的情况）。
 
-## 入门指南
+## 开始
 
-**引入方式**
+### 集成
 
 添加依赖
 
-作为第一步,依赖这个库添加到您的项目。如何使用库, Gradle是推荐的方式使用这个库的依赖。
+```
 
-添加以下代码在你的APP级别 app build.gradle:
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
 
-	compile 'com.qindachang:BluetoothLELibrary:0.7.4'
+dependencies {
+    implementation 'com.github.davistsin:BluetoothLELibrary:{latest version}'
+}
+
+```
+
+蓝牙扫描推荐使用 [Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)
+
+```
+implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
+```
 
 **权限：**
 
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+```
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+```
 
 5.0以上需要
 
-    <!-- 只有当你的 targets API 等于或大于 Android 5.0 (API level 21) 才需要此权限 -->
-    <uses-feature android:name="android.hardware.location.gps" />
+```
+<!-- 只有当你的 targets API 等于或大于 Android 5.0 (API level 21) 才需要此权限 -->
+<uses-feature android:name="android.hardware.location.gps" />
+```
 
-6.0以上设备需要
+6.0以上需要
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
 
-### 代码
+12以上需要
 
-**前戏**
+```
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
-是否支持蓝牙
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
-    mBluetoothLe.isSupportBluetooth();
+<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+```
 
-判断蓝牙是否打开
+---
 
-    mBluetoothLe.isBluetoothOpen();
+### 一、 使用介绍（主机模式）
 
-请求打开蓝牙
+是否支持蓝牙  
 
-    mBluetoothLe.enableBluetooth(activity.this);
+```Java
+BleHelper.isSupportBluetooth();
+```
+
+蓝牙是否打开
+
+```Java
+BleHelper.isBluetoothEnable();
+```
+
+打开蓝牙
+
+```Java
+BleHelper.enableBluetooth();
+```
 
 关闭蓝牙
 
-    mBluetoothLe.disableBluetooth();
+```Java
+BleHelper.disableBluetooth();
+```
 
+获取已连接的蓝牙设备列表
 
-**一、获取单例实例**
+```Java
+BleHelper.getConnectedDevices(this);
+```
+
+#### 1. 扫描
+
+文档前往：
+
+[https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)
+
+#### 2. 连接
+
+可以创建多个连接实例
 
 ```java
-BluetoothLe mBluetoothLe = BluetoothLe.getDefault();
-```
+ConnectorSettings settings = new ConnectorSettings.Builder()
+        .autoConnect(true)
+        .autoDiscoverServices(true)
+        .enableQueue(true)
+        .setQueueIntervalTime(ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO)
+        .build();
+BleConnector bleConnector = BleConnectCreator.create(MainActivity.this, bluetoothDevice, settings);
 
-**二、初始化**
+bleConnector.connect();
 
-	mBluetoothLe.init(this);//必须调用init()初始化
-
-或者使用配置方式进行初始化，这样你可以针对自己的蓝牙产品，做出个性化的蓝牙队列请求。
-
-such as : 发送队列间隔时间设置，因某些公司蓝牙操作要求时间间隔，例如150ms间隔才能发送下一条数据
-
-在Application的onCreate()方法中参照以下方式配置：
-
-```java
-    public class BaseApplication extends Application {
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            BluetoothConfig config = new BluetoothConfig.Builder()
-                    .enableQueueInterval(true)//开启队列定时
-                    .setQueueIntervalTime(150)//设置定时150ms时长（才会发下一条），单位ms
-                    .build();
-            BluetoothLe.getDefault().init(this, config);
-        }
-    }
-```
-
-当然，你也可以使用自动的方式来配置蓝牙队列请求。这个时间间隔是通过读取远程蓝牙设备的最小间隔和最大间隔计算得出，保证了队列的最大可用性。
-
-```java
-    BluetoothConfig config = new BluetoothConfig.Builder()
-            .enableQueueInterval(true)
-            .setQueueIntervalTime(BluetoothConfig.AUTO)//发送时间间隔将根据蓝牙硬件自动得出
-            .build();
-    BluetoothLe.getDefault().init(this, config);
-```
-
-上述的读取远程蓝牙设备的最小间隔和最大间隔，你可以在连上蓝牙发现服务后读取：
-
-```java
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt) {
-            mStringBuilder.append("发现服务啦\n");
-            mTvText.setText(mStringBuilder.toString());
-
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //查看远程蓝牙设备的连接参数，如蓝牙的最小时间间隔和最大时间间隔等..
-                    Log.d("debug", mBluetoothLe.readConnectionParameters().toString());
-                }
-            }, 1000);
-        }
-```
-
-在使用途中修改以上配置：
-
-修改配置：
-
-```java
-    BluetoothConfig config = new BluetoothConfig.Builder()
-                    .enableQueueInterval(false)
-                    .build();
-    mBluetoothLe.changeConfig(config);
-```
-
-**三、扫描**
-
-扫描过程已携带6.0动态权限申请：地理位置权限
-
-```java
-    mBluetoothLe.setScanPeriod(15000)//设置扫描时长，单位毫秒，默认10秒
-                .setScanWithDeviceAddress("00:20:ff:34:aa:b3")//根据硬件地址过滤扫描
-                .setScanWithServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")//设置根据服务uuid过滤扫描
-                .setScanWithDeviceName("ZG1616")//设置根据设备名称过滤扫描
-                .setReportDelay(0)//如果为0，则回调onScanResult()方法，如果大于0, 则每隔你设置的时长回调onBatchScanResults()方法，不能小于0
-                .startScan(Activity activity);
-```
-
-根据多个硬件地址、服务uuid、设备名称过滤扫描，你可以这样：
-
-```java
-    .setScanWithDeviceAddress(new String[]{"00:20:ff:34:aa:b3","f3:84:55:b4:ab:7f"})
-    .setScanWithServiceUUID(new String[]{"0000180d-0000-1000-8000-00805f9b34fb","6E400001-B5A3-F393-E0A9-E50E24DCCA9E"})
-    .setScanWithDeviceName(new String[]{"ZG1616","HaHa"})
-```
-
-获取蓝牙扫描状态：
-
-    mBluetoothLe.getScanning();
-
-
-**停止扫描**
-
-    mBluetoothLe.stopScan();
-
-**四、连接蓝牙、蓝牙连接状态**
-
-```java
-	//发送数据、开启通知等操作，必须等待onServicesDiscovered()发现服务回调后，才能去操作
-	//参数：false为关闭蓝牙自动重连，如果为true则自动重连
-    mBluetoothLe.startConnect(false, mBluetoothDevice);
-```
-
-获取蓝牙连接状态：
-
-    mBluetoothLe.getConnected();
-
-获取发现服务状态：
-
-    mBluetoothLe.getServicesDiscovered();
-
-
-**断开连接**
-
-    mBluetoothLe.disconnect();
-
-**五、发送数据（到蓝牙特征）**
-
-```java
-	//以下两个参数为硬件工程师提供，请你与你司的硬件工程师沟通
-    private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
-    private static final String WRITE_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
-
-    mBluetoothLe.writeDataToCharacteristic(bytes, SERVICE_UUID, WRITE_UUID);
-```
-
-
-**六、Notification类型通知**
-
-```java
-	private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
-    private static final String HEART_NOTIFICATION_UUID = "00002a37-0000-1000-8000-00805f9b34fb";
-    private static final String STEP_NOTIFICATION_UUID = "0000fff3-0000-1000-8000-00805f9b34fb";
-```
-
-开启一个通知
-
-```
-	mBluetoothLe.enableNotification(true, SERVICE_UUID, STEP_NOTIFICATION_UUID);
-```
-
-开启多个通知
-
-```java
-    mBluetoothLe.enableNotification(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
-```
-
-**七、Indication类型通知**
-
-开启一个通知
-
-```java
-	mBluetoothLe.enableIndication(true, SERVICE_UUID, STEP_NOTIFICATION_UUID);
-```
-
-开启多个通知
-
-```java
-    mBluetoothLe.enableIndication(true, SERVICE_UUID, new String[]{HEART_NOTIFICATION_UUID, STEP_NOTIFICATION_UUID});
-```
-
-**八、读取数据**
-
-```java
-    private static final String SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb";
-    private static final String READ_UUID = "0000fff5-0000-1000-8000-00805f9b34fb";
-
-    mBluetoothLe.readCharacteristic(SERVICE_UUID, READ_UUID);
-```
-
-**九、蓝牙信号强度、距离**
-
-```java
-    mBluetoothLe.setReadRssiInterval(2000)//设置读取信号强度间隔时间，单位毫秒
-            .setOnReadRssiListener(TAG, new OnLeReadRssiListener() {
-                @Override
-                public void onSuccess(int rssi, int cm) {
-
-                }
-            });
-```
-
-停止监听蓝牙信号强度
-
-    mBluetoothLe.stopReadRssi();
-
-### 监听
-
-```java
-//监听扫描
-//Every Bluetooth-LE commands status will be callback in here. Flowing listener:
-mBleManager.setOnScanListener(TAG, new OnLeScanListener() {
+bleConnector.addConnectionListener(new BleConnectionListener() {
     @Override
-    public void onScanResult(BluetoothDevice bluetoothDevice, int rssi, ScanRecord scanRecord) {
+    public void onConnecting() {
 
     }
 
     @Override
-    public void onBatchScanResults(List<ScanResult> results) {
+    public void onConnected(BluetoothDevice device) {
 
     }
 
     @Override
-    public void onScanCompleted() {
+    public void onDisconnected() {
 
     }
 
     @Override
-    public void onScanFailed(ScanBleException e) {
+    public void onFailure() {
 
     }
 });
 ```
-
-更多的类似于
+#### 3. 发现服务
 
 ```java
-mBleManager.setOnConnectListener(...)//监听连接
-mBleManager.setOnNotificationListener(...)//监听通知
-mBleManager.setOnIndicateListener(...)//监听通知
-mBleManager.setOnWriteCharacteristicListener(...)//监听写
-mBleManager.setOnReadCharacteristicListener(...)//监听读
-mBleManager.setOnReadRssiListener(...)//监听信号强度
+bleConnector.discoverServices();
+
+bleConnector.addDiscoveryListener(new BleDiscoverServicesListener() {
+    @Override
+    public void onServicesDiscovered(BluetoothGatt gatt) {
+
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
+});
+```
+#### 4. 读取数据
+
+```java
+bleConnector.readCharacteristic("serviceUUID", "characteristicUUID");
+
+bleConnector.addReadCharacteristicListener(new BleReadCharacteristicListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
+});
+```
+#### 5. 发送数据
+```java
+bleConnector.writeCharacteristic(new byte[]{0x01,0x02,0x03}, "serviceUUID", "characteristicUUID");
+
+bleConnector.addWriteCharacteristicListener(new BleWriteCharacteristicListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+```
+#### 6. 通知
+```java
+// 打开Notification
+bleConnector.enableNotification(true, "serviceUUID", "characteristicUUID");
+// 关闭Notification
+bleConnector.enableNotification(false, "serviceUUID", "characteristicUUID");
+
+bleConnector.addNotificationListener(new BleNotificationListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+
+// 打开Indication
+bleConnector.enableIndication(true, "serviceUUID", "characteristicUUID");
+// 关闭Indication
+bleConnector.enableIndication(false, "serviceUUID", "characteristicUUID");
+
+bleConnector.addIndicationListener(new BleIndicationListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+```
+#### 7. 移除监听、关闭连接
+```java
+bleConnector.removeAllListeners();
+
+bleConnector.close();
 ```
 
-拥有TAG的监听将可以在多个界面中产生回调，这可以帮助你实现多个Activity或Fragment监听蓝牙状态的需求。如不使用TAG的监听，将只有一个回调。
+---
 
-使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy(TAG);
-如不使用TAG监听，需要在生命周期onDestroy()中调用mBluetoothLe.destroy();
+### 二、使用介绍（从机模式）
 
-### 其它
+#### 1. 启动
 
-**清理蓝牙缓存**
+```java
+private BleGattServer mGattServer = new BleGattServer();
 
-请你在连接上蓝牙后，再执行这步操作
+mGattServer.startAdvertising(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")); // 该uuid可提供给主机client过滤扫描，可以自定义
+mGattServer.startServer(context);
+```
+#### 2. 开始广播/停止广播
 
-    mBluetoothLe.clearDeviceCache();
+```java
+mGattServer.startAdvertising("serviceUUID");
 
-**关闭GATT**
+mGattServer.stopAdvertising();
+```
 
-在你退出应用的时候使用
+#### 4. 添加蓝牙服务Service
 
-    mBluetoothLe.close();
+```java
+List<ServiceProfile> list = new ArrayList<>();
 
-**取消队列**
+// 设置一个写的特征
+ServiceProfile profile = new ServiceProfile();
+profile.setCharacteristicUuid(UUID.fromString("0000fff3-0000-1000-8000-00805f9b34fb"));
+profile.setCharacteristicProperties(BluetoothGattCharacteristic.PROPERTY_WRITE);
+profile.setCharacteristicPermission(BluetoothGattCharacteristic.PERMISSION_WRITE);
+profile.setDescriptorUuid(GattServer.CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+profile.setDescriptorPermission(BluetoothGattDescriptor.PERMISSION_READ);
+profile.setDescriptorValue(new byte[]{0});
+list.add(profile);
 
-假设当你在for循环中发送100条数据，想要在中途取消余下的发送
+// 设置一个读的特征
+ServiceProfile profile1 = new ServiceProfile();
+profile1.setCharacteristicUuid(UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb"));
+profile1.setCharacteristicProperties(BluetoothGattCharacteristic.PROPERTY_READ);
+profile1.setCharacteristicPermission(BluetoothGattCharacteristic.PERMISSION_READ);
+profile1.setDescriptorUuid(GattServer.CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+profile1.setDescriptorPermission(BluetoothGattDescriptor.PERMISSION_READ);
+profile1.setDescriptorValue(new byte[]{1});
+list.add(profile1);
 
-    mBluetoothLe.clearQueue();
+// 设置一个notify通知
+ServiceProfile profile2 = new ServiceProfile();
+profile2.setCharacteristicUuid(UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb"));
+profile2.setCharacteristicProperties(BluetoothGattCharacteristic.PROPERTY_NOTIFY);
+profile2.setCharacteristicPermission(BluetoothGattCharacteristic.PERMISSION_READ);
+profile2.setDescriptorUuid(GattServer.CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
+profile2.setDescriptorPermission(BluetoothGattDescriptor.PERMISSION_WRITE);
+profile2.setDescriptorValue(new byte[]{1});
+list.add(profile2);
 
-### 避免内存泄露
+final ServiceSettings serviceSettings = new ServiceSettings.Builder()
+        .setServiceUuid(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"))//服务uuid
+        .setServiceType(BluetoothGattService.SERVICE_TYPE_PRIMARY)
+        .addServiceProfiles(list)//上述设置添加到该服务里
+        .build();
 
-在Activity生命周期onDestroy() 中使用：
+mGattServer.addService(serviceSettings);
+```
 
-	mBluetoothLe.destroy();
+#### 4. 回调监听
 
-如果你使用了tag标签的监听，使用: （它的好处是你可以在多个界面产生多个相同的回调）
+```java
+mGattServer.addOnAdvertiseListener(new OnAdvertiseListener() {
+    @Override
+    public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+        setContentText("开启广播  成功，uuid：0000fff0-0000-1000-8000-00805f9b34fb");
+    }
 
-    mBluetoothLe.destroy(TAG);
+    @Override
+    public void onStartFailure(int errorCode) {
+        setContentText("开启广播  失败，uuid：0000fff0-0000-1000-8000-00805f9b34fb");
+    }
 
-取消对应tag：
+    @Override
+    public void onStopAdvertising() {
+        setContentText("停止广播，uuid：0000fff0-0000-1000-8000-00805f9b34fb");
+    }
+});
 
-    mBluetoothLe.cancelTag(TAG);
+mGattServer.addOnServiceAddedListener(new OnServiceAddedListener() {
+    @Override
+    public void onSuccess(BluetoothGattService service) {
+        setContentText("添加服务成功！");
+    }
 
-取消全部tag：
+    @Override
+    public void onFail(BluetoothGattService service) {
+        setContentText("添加服务失败");
+    }
+});
 
-    mBluetoothLe.cancelAllTag();
+mGattServer.addOnConnectionStateChangeListener(new OnConnectionStateChangeListener() {
+    @Override
+    public void onChange(BluetoothDevice device, int status, int newState) {
 
-## 仍在补充
+    }
 
-1. 一连多台蓝牙设备
+    @Override
+    public void onConnected(BluetoothDevice device) {
+        setContentText("连接上一台设备 ：{ name = " + device.getName() + ", address = " + device.getAddress() + "}");
+        mBluetoothDevice = device;
+    }
 
-## 了解更多
+    @Override
+    public void onDisconnected(BluetoothDevice device) {
+        setContentText("设备断开连接 ：{ name = " + device.getName() + ", address = " + device.getAddress() + "}");
+    }
+});
 
-1. 强烈建议阅读Demo ：
-[MainActivity.java](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/test/MainActivity.java "MainActivity.java") /
-[activity_main.xml](https://github.com/qindachang/BluetoothLELibrary/blob/master/app/src/main/res/layout/activity_main.xml "activity_main.xml")
+mGattServer.addOnWriteRequestListener(new OnWriteRequestListener() {
+    @Override
+    public void onCharacteristicWritten(BluetoothDevice device, BluetoothGattCharacteristic characteristic, byte[] value) {
+        setContentText("设备写入特征请求 ： device = " + device.getAddress() + ", characteristic uuid = " + characteristic.getUuid().toString() + ", value = " + Arrays.toString(value));
+    }
 
-2. 如何在多个Activity和Fragment中使用：
-[https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo](https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo "https://github.com/qindachang/BluetoothLELibrary/tree/master/app/src/main/java/com/qindachang/bluetoothlelibrary/ui/demo")
+    @Override
+    public void onDescriptorWritten(BluetoothDevice device, BluetoothGattDescriptor descriptor, byte[] value) {
+        setContentText("设备写入描述请求 ： device = " + device.getAddress() + ", descriptor uuid = " + descriptor.getUuid().toString() + ", value = " + Arrays.toString(value));
+    }
+});
 
-### Thanks
+```
 
-[NordicSemiconductor](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library "NordicSemiconductor")
+#### 5. 移除监听、关闭
 
-1. [philips77](https://github.com/philips77 "philips77")
-2. [aldoborrero](https://github.com/aldoborrero "aldoborrero")
+```java
+mGattServer.removeAllListeners();
+
+mGattServer.closeServer();
+```
