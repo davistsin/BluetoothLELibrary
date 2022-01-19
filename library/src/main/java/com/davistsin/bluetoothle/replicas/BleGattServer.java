@@ -225,12 +225,12 @@ public final class BleGattServer {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean closeServer() {
+        removeAllListeners();
         if (mBluetoothGattServer == null) {
             return false;
         }
         stopAdvertising();
         mBluetoothGattServer.close();
-        removeAllListeners();
         return true;
     }
 

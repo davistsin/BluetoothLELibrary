@@ -3,7 +3,7 @@ package com.davistsin.bluetoothle.main.connect;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
-public class BleConnectCreator {
+public final class BleConnectCreator {
 
     private BleConnectCreator() {}
 

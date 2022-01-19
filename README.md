@@ -1,7 +1,7 @@
 ![title](./image/title.jpg)
 
 [![Release](https://jitpack.io/v/User/Repo.svg)]
-(https://jitpack.io/#User/Repo)
+(https://jitpack.io/#User/Repo)  ![license](https://img.shields.io/github/license/davistsin/BluetoothLELibrary)
 
 [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
@@ -33,10 +33,21 @@
 添加依赖
 
 ```
-implementation 'com.github.davistsin:BluetoothLELibrary:{latest version}'
+
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+dependencies {
+    implementation 'com.github.davistsin:BluetoothLELibrary:{latest version}'
+}
+
 ```
 
-蓝牙扫描推荐使用 [Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)。
+蓝牙扫描推荐使用 [Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)
 
 ```
 implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
@@ -73,8 +84,9 @@ implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
 <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 ```
 
+---
 
-### A. 使用介绍（主机模式）
+### 一、 使用介绍（主机模式）
 
 是否支持蓝牙  
 
@@ -106,38 +118,163 @@ BleHelper.disableBluetooth();
 BleHelper.getConnectedDevices(this);
 ```
 
-#### 一、扫描
+#### 1. 扫描
 
 文档前往：
 
-[https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library]()
+[https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library](https://github.com/NordicSemiconductor/Android-Scanner-Compat-Library)
 
-#### 二、连接
-#### 三、发现服务
-#### 四、读取数据
-#### 五、发送数据
-#### 六、开启通知
-#### 七、移除监听、关闭连接
+#### 2. 连接
 
+可以创建多个连接实例
 
-### B. 使用介绍（从机模式）
+```java
+ConnectorSettings settings = new ConnectorSettings.Builder()
+        .autoConnect(true)
+        .autoDiscoverServices(true)
+        .enableQueue(true)
+        .setQueueIntervalTime(ConnectorSettings.QUEUE_INTERVAL_TIME_AUTO)
+        .build();
+BleConnector bleConnector = BleConnectCreator.create(MainActivity.this, bluetoothDevice, settings);
 
-#### 一、开启广播
+bleConnector.connect();
+
+bleConnector.addConnectionListener(new BleConnectionListener() {
+    @Override
+    public void onConnecting() {
+
+    }
+
+    @Override
+    public void onConnected(BluetoothDevice device) {
+
+    }
+
+    @Override
+    public void onDisconnected() {
+
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
+});
+```
+#### 3. 发现服务
+
+```java
+bleConnector.discoverServices();
+
+bleConnector.addDiscoveryListener(new BleDiscoverServicesListener() {
+    @Override
+    public void onServicesDiscovered(BluetoothGatt gatt) {
+
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
+});
+```
+#### 4. 读取数据
+
+```java
+bleConnector.readCharacteristic("serviceUUID", "characteristicUUID");
+
+bleConnector.addReadCharacteristicListener(new BleReadCharacteristicListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
+});
+```
+#### 5. 发送数据
+```java
+bleConnector.writeCharacteristic(new byte[]{0x01,0x02,0x03}, "serviceUUID", "characteristicUUID");
+
+bleConnector.addWriteCharacteristicListener(new BleWriteCharacteristicListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+```
+#### 6. 通知
+```java
+// 打开Notification
+bleConnector.enableNotification(true, "serviceUUID", "characteristicUUID");
+// 关闭Notification
+bleConnector.enableNotification(false, "serviceUUID", "characteristicUUID");
+
+bleConnector.addNotificationListener(new BleNotificationListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+
+// 打开Indication
+bleConnector.enableIndication(true, "serviceUUID", "characteristicUUID");
+// 关闭Indication
+bleConnector.enableIndication(false, "serviceUUID", "characteristicUUID");
+
+bleConnector.addIndicationListener(new BleIndicationListener() {
+    @Override
+    public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        byte[] data = characteristic.getValue();
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
+});
+```
+#### 7. 移除监听、关闭连接
+```java
+bleConnector.removeAllListeners();
+
+bleConnector.close();
+```
+
+---
+
+### 二、使用介绍（从机模式）
+
+#### 1. 启动
 
 ```java
 private BleGattServer mGattServer = new BleGattServer();
 
 mGattServer.startAdvertising(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")); // 该uuid可提供给主机client过滤扫描，可以自定义
+mGattServer.startServer(context);
+```
+#### 2. 开始广播/停止广播
+
+```java
+mGattServer.startAdvertising("serviceUUID");
 
 mGattServer.stopAdvertising();
 ```
-#### 二、启动
 
-```java
-mGattServer.startServer(context);
-```
-
-#### 三、添加蓝牙服务Service
+#### 4. 添加蓝牙服务Service
 
 ```java
 List<ServiceProfile> list = new ArrayList<>();
@@ -181,7 +318,7 @@ final ServiceSettings serviceSettings = new ServiceSettings.Builder()
 mGattServer.addService(serviceSettings);
 ```
 
-#### 四、回调监听
+#### 4. 回调监听
 
 ```java
 mGattServer.addOnAdvertiseListener(new OnAdvertiseListener() {
@@ -245,7 +382,7 @@ mGattServer.addOnWriteRequestListener(new OnWriteRequestListener() {
 
 ```
 
-#### 五、移除监听、关闭
+#### 5. 移除监听、关闭
 
 ```java
 mGattServer.removeAllListeners();

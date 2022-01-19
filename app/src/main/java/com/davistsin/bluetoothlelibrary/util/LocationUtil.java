@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 
-/**
- * Created by qindachang on 2017/2/23.
- */
 
 public class LocationUtil {
 
