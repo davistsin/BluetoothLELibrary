@@ -1,7 +1,6 @@
 ![title](./image/title.jpg)
 
-[![Release](https://jitpack.io/v/User/Repo.svg)]
-(https://jitpack.io/#User/Repo)  ![license](https://img.shields.io/github/license/davistsin/BluetoothLELibrary)
+[![](https://jitpack.io/v/davistsin/BluetoothLELibrary.svg)](https://jitpack.io/#davistsin/BluetoothLELibrary)  ![license](https://img.shields.io/github/license/davistsin/BluetoothLELibrary)
 
 [固件升级/硬件升级/DFU](https://github.com/qindachang/DFUDemo "固件升级/硬件升级/DFU")
 
